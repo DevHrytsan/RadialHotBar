@@ -1,8 +1,8 @@
 package github.devhrytsan.radialhotbar.menu;
 
-import github.devhrytsan.radialhotbar.Constants;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.utils.MathUtils;
+import github.devhrytsan.radialhotbar.utils.MenuUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -159,8 +159,24 @@ public class RadialMenuScreen extends Screen {
             }
         }
 
+        if (FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots) {
+            slotsToDraw.sort((slotIndexA, slotIndexB) -> {
+                ItemStack stackA = player.getInventory().getStack(slotIndexA);
+                ItemStack stackB = player.getInventory().getStack(slotIndexB);
+
+                // Get category priority (lower number = appears first)
+                int categoryA = MenuUtils.getItemCategoryOrder(stackA);
+                int categoryB = MenuUtils.getItemCategoryOrder(stackB);
+
+                if (categoryA != categoryB) {
+                    return Integer.compare(categoryA, categoryB);
+                }
+                // If categories are the same, sort by item name to keep it
+                return stackA.getName().getString().compareTo(stackB.getName().getString());
+            });
+        }
+
         totalItemsToDraw = slotsToDraw.size();
-        //if (totalItemsToDraw == 0) return;
     }
 
     private void renderItems(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -310,10 +326,49 @@ public class RadialMenuScreen extends Screen {
     private void handleInventorySwap(int sourceSlot) {
 
         if (sourceSlot >= 0 && sourceSlot < 9) {
-            client.player.getInventory().setSelectedSlot(sourceSlot);
-            client.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(sourceSlot));
+
+            if (FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor) {
+
+                ItemStack selectedStack = client.player.getInventory().getStack(sourceSlot);
+                EquippableComponent equippable = selectedStack.get(DataComponentTypes.EQUIPPABLE);
+
+                if (equippable != null) {
+                    EquipmentSlot slotType = equippable.slot();
+                    boolean isArmorSlot = slotType.isArmorSlot() && slotType != null; //|| slotType == EquipmentSlot.OFFHAND;
+                    // EquipmentSlot.OFFHAND is used to be for check shields and similar items.
+
+                    if (isArmorSlot) {
+                        int validSlotId = sourceSlot;
+
+                        if (sourceSlot >= 0 && sourceSlot <= 8) {
+                            validSlotId = sourceSlot + 36;
+
+                            // If it's in main inventory (9-35) mapped ID is generally same (9-35) in PlayerScreenHandler
+                            // BUT if sourceSlot logic includes the hotbar or treats inv rows separately.
+                            // In Standard Player Inventory: main is 9-35, hotbar is 0-8.
+                            // In ScreenHandler: main is 9-35, hotbar is 36-44.
+                        }
+
+                        client.interactionManager.clickSlot(
+                                client.player.playerScreenHandler.syncId,
+                                validSlotId,
+                                0,
+                                SlotActionType.QUICK_MOVE,
+                                client.player
+                        );
+                        //TODO: Make that player can auto equip and select(with some states) in radial menu.
+                    } else {
+                        HandleInteraction(sourceSlot);
+                    }
+                } else {
+                    HandleInteraction(sourceSlot);
+                }
+            } else {
+                HandleInteraction(sourceSlot);
+            }
 
         } else {
+            // That logic is just placeholder
             int currentSlot = client.player.getInventory().getSelectedSlot();
 
             client.interactionManager.clickSlot(
@@ -325,4 +380,10 @@ public class RadialMenuScreen extends Screen {
             );
         }
     }
+
+    private void HandleInteraction(int sourceSlot) {
+        client.player.getInventory().setSelectedSlot(sourceSlot);
+        client.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(sourceSlot));
+    }
+
 }

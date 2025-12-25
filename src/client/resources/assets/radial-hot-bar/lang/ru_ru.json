@@ -15,5 +15,9 @@
   "config.radialhotbar.option.useCenterItemPreview": "Показывать предпросмотр предмета в центре",
   "config.radialhotbar.option.useCenterItemPreview.tooltip": "Включает предпросмотр предмета, отображаемый в центре радиального меню.",
   "config.radialhotbar.option.allowMovementWhileOpen": "Разрешить движение",
-  "config.radialhotbar.option.allowMovementWhileOpen.tooltip": "Позволяет игроку двигаться, пока открыто радиальное меню."
+  "config.radialhotbar.option.allowMovementWhileOpen.tooltip": "Позволяет игроку двигаться, пока открыто радиальное меню.",
+  "config.radialhotbar.option.autoSort": "Автоматическая сортировка",
+  "config.radialhotbar.option.autoSort.tooltip": "Автоматически сортирует предметы по категориям: инструменты, оружие, еда, блоки и зелья.",
+  "config.radialhotbar.option.autoEquipArmor": "Автоматически надевать броню",
+  "config.radialhotbar.option.autoEquipArmor.tooltip": "Автоматически надевает броню при выборе её в радиальном меню."
 }

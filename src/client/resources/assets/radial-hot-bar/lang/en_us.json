@@ -15,5 +15,9 @@
   "config.radialhotbar.option.useCenterItemPreview": "Show a item preview in the center",
   "config.radialhotbar.option.useCenterItemPreview.tooltip": "Enables the item preview shown in the center of the radial menu.",
   "config.radialhotbar.option.allowMovementWhileOpen": "Allow movement",
-  "config.radialhotbar.option.allowMovementWhileOpen.tooltip": "Allows the player to move while the radial menu is open."
+  "config.radialhotbar.option.allowMovementWhileOpen.tooltip": "Allows the player to move while the radial menu is open.",
+  "config.radialhotbar.option.autoSort": "Auto Sort",
+  "config.radialhotbar.option.autoSort.tooltip": "Automatically sorts items by category: Tools, Weapons, Food, Blocks, and Potions.",
+  "config.radialhotbar.option.autoEquipArmor": "Auto Equip Armor",
+  "config.radialhotbar.option.autoEquipArmor.tooltip": "Automatically equips armor when it is selected from the radial menu."
 }

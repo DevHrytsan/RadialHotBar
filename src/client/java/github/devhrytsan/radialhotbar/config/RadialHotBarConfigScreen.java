@@ -60,6 +60,18 @@ public class RadialHotBarConfigScreen {
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.radialhotbar.option.autoSort"), FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots)
+                .setDefaultValue(false)
+                .setTooltip(Text.translatable("config.radialhotbar.option.autoSort.tooltip"))
+                .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.radialhotbar.option.autoEquipArmor"), FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor)
+                .setDefaultValue(true)
+                .setTooltip(Text.translatable("config.radialhotbar.option.autoEquipArmor.tooltip"))
+                .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor = newValue)
+                .build());
+
         return builder.build();
     }
 }
