@@ -1,6 +1,7 @@
 package github.devhrytsan.radialhotbar.utils;
 
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -48,4 +49,16 @@ public class MenuUtils {
         return false;
     }
 
+    public static int getArmorSlot(EquipmentSlot slot) {
+        int armorSlotId = -1;
+        switch (slot) {
+            case HEAD -> armorSlotId = 5;
+            case CHEST -> armorSlotId = 6;
+            case LEGS -> armorSlotId = 7;
+            case FEET -> armorSlotId = 8;
+            case OFFHAND -> armorSlotId = 45;
+            default -> armorSlotId = -1;
+        }
+        return armorSlotId;
+    }
 }

@@ -1,5 +1,6 @@
 package github.devhrytsan.radialhotbar.menu;
 
+import github.devhrytsan.radialhotbar.Constants;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.utils.MathUtils;
 import github.devhrytsan.radialhotbar.utils.MenuUtils;
@@ -334,7 +335,7 @@ public class RadialMenuScreen extends Screen {
 
                 if (equippable != null) {
                     EquipmentSlot slotType = equippable.slot();
-                    boolean isArmorSlot = slotType.isArmorSlot() && slotType != null; //|| slotType == EquipmentSlot.OFFHAND;
+                    boolean isArmorSlot = slotType != null && slotType.isArmorSlot(); //|| slotType == EquipmentSlot.OFFHAND);
                     // EquipmentSlot.OFFHAND is used to be for check shields and similar items.
 
                     if (isArmorSlot) {
@@ -349,13 +350,32 @@ public class RadialMenuScreen extends Screen {
                             // In ScreenHandler: main is 9-35, hotbar is 36-44.
                         }
 
+                        int armorSlotId = MenuUtils.getArmorSlot(slotType);
+
                         client.interactionManager.clickSlot(
                                 client.player.playerScreenHandler.syncId,
                                 validSlotId,
                                 0,
-                                SlotActionType.QUICK_MOVE,
+                                SlotActionType.PICKUP,
                                 client.player
                         );
+
+                        client.interactionManager.clickSlot(
+                                client.player.playerScreenHandler.syncId,
+                                armorSlotId,
+                                0,
+                                SlotActionType.PICKUP,
+                                client.player
+                        );
+
+                        client.interactionManager.clickSlot(
+                                client.player.playerScreenHandler.syncId,
+                                validSlotId,
+                                0,
+                                SlotActionType.PICKUP,
+                                client.player
+                        );
+
                         //TODO: Make that player can auto equip and select(with some states) in radial menu.
                     } else {
                         HandleInteraction(sourceSlot);
