@@ -47,6 +47,10 @@ public class RadialMenuScreen extends Screen {
     public static final RadialMenuScreen INSTANCE = new RadialMenuScreen();
     public boolean active = false;
 
+    public int lastUsedSlot = 0;
+    private int initialSlot = 0;
+    public boolean itemSelected = false;
+
     public RadialMenuScreen() {
         super(Text.translatable("main.radialhotbar.title"));
         slotsToDraw = new ArrayList<>(MAX_SLOTS_COUNT);
@@ -131,6 +135,15 @@ public class RadialMenuScreen extends Screen {
 
     public void activate() {
         if (MinecraftClient.getInstance().currentScreen == null) {
+            if (client != null && client.player != null) {
+                int currentSlot = client.player.getInventory().selectedSlot;
+                if (currentSlot != initialSlot) {
+                    lastUsedSlot = initialSlot;
+                }
+
+                this.initialSlot = currentSlot;
+            }
+            this.itemSelected = false;
             // So basically it works it only allows when the player is playing the game and not looking at another menu.
             active = true;
             MinecraftClient.getInstance().setScreen(INSTANCE);
@@ -139,6 +152,19 @@ public class RadialMenuScreen extends Screen {
 
     public void deactivate() {
         active = false;
+        if (client != null && client.player != null) {
+            // If the user just tapped the key without hovering over an item:
+            if (!itemSelected) {
+                int currentSlot = client.player.getInventory().selectedSlot;
+
+                int target = lastUsedSlot;
+                lastUsedSlot = currentSlot;
+                initialSlot = target;
+
+                HandleInteraction(target);
+            }
+        }
+
         if (MinecraftClient.getInstance().currentScreen == INSTANCE) {
             MinecraftClient.getInstance().setScreen(null);
         }
@@ -174,10 +200,14 @@ public class RadialMenuScreen extends Screen {
             double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
             boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
+
                     MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
             if (mouseIn) {
+                this.itemSelected = true;
                 handleInventorySwap(realSlotIndex);
+                this.lastUsedSlot = initialSlot;
+                this.initialSlot = realSlotIndex;
                 break;
             }
 
