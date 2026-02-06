@@ -68,6 +68,10 @@ public class RadialMenuScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+            handleMovement();
+        }
+
         this.renderBackground(context);
 
         super.render(context, mouseX, mouseY, delta);
@@ -99,7 +103,21 @@ public class RadialMenuScreen extends Screen {
         }
     }
 
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+            return false;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+            return false;
+        }
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
 
     @Override
     public boolean shouldPause() {
