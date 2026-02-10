@@ -18,8 +18,7 @@ public class Constants {
     public static final String MOD_ID = "radialhotbar";
     public static final String MOD_NAME = "Radial Hot Bar";
     public static final Logger MAIN_LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static final KeyBinding.Category KEYBIND_CATEGORY = KeyBinding.Category.create(Identifier.of(MOD_ID, "general"));
-
+    public static final String KEYBIND_CATEGORY = "key.category." + MOD_ID + ".general";
     // UI
     public static final int DEFAULT_SCALE_FACTOR = 3;
     public static final int MIN_SCALE_FACTOR = 1;

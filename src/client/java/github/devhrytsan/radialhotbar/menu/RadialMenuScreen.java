@@ -12,14 +12,14 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
@@ -47,6 +47,10 @@ public class RadialMenuScreen extends Screen {
     public static final RadialMenuScreen INSTANCE = new RadialMenuScreen();
     public boolean active = false;
 
+    public int lastUsedSlot = 0;
+    private int initialSlot = 0;
+    public boolean itemSelected = false;
+
     public RadialMenuScreen() {
         super(Text.translatable("main.radialhotbar.title"));
         slotsToDraw = new ArrayList<>(MAX_SLOTS_COUNT);
@@ -68,6 +72,12 @@ public class RadialMenuScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+            handleMovement();
+        }
+
+        this.renderBackground(context);
+
         super.render(context, mouseX, mouseY, delta);
 
         boolean isEnabled = FileConfigHandler.CONFIG_INSTANCE.modEnabled;
@@ -82,10 +92,35 @@ public class RadialMenuScreen extends Screen {
     }
 
     @Override
-    public void removed() { // Cleanup logic that runs automatically when Radial Menu closes
+    public void removed() {
 
         super.removed();
         active = false;
+    }
+
+    @Override
+    public void renderBackground(DrawContext context) {
+        if (this.client.world != null) {
+            context.fillGradient(0, 0, this.width, this.height, 0xC0101010, 0xD0101010);
+        } else {
+            this.renderBackgroundTexture(context);
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+            return false;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+            return false;
+        }
+        return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -100,6 +135,15 @@ public class RadialMenuScreen extends Screen {
 
     public void activate() {
         if (MinecraftClient.getInstance().currentScreen == null) {
+            if (client != null && client.player != null) {
+                int currentSlot = client.player.getInventory().selectedSlot;
+                if (currentSlot != initialSlot) {
+                    lastUsedSlot = initialSlot;
+                }
+
+                this.initialSlot = currentSlot;
+            }
+            this.itemSelected = false;
             // So basically it works it only allows when the player is playing the game and not looking at another menu.
             active = true;
             MinecraftClient.getInstance().setScreen(INSTANCE);
@@ -108,42 +152,63 @@ public class RadialMenuScreen extends Screen {
 
     public void deactivate() {
         active = false;
+        if (client != null && client.player != null) {
+            // If the user just tapped the key without hovering over an item:
+            if (!itemSelected) {
+                int currentSlot = client.player.getInventory().selectedSlot;
+
+                int target = lastUsedSlot;
+                lastUsedSlot = currentSlot;
+                initialSlot = target;
+
+                HandleInteraction(target);
+            }
+        }
+
         if (MinecraftClient.getInstance().currentScreen == INSTANCE) {
             MinecraftClient.getInstance().setScreen(null);
         }
     }
 
     public void selectItem(double mouseX, double mouseY, int button) {
-        if (active) {
-            int centerX = client.getWindow().getScaledWidth() / 2;
-            int centerY = client.getWindow().getScaledHeight() / 2;
+        if (client == null || client.player == null) return;
 
-            float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
-            float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
-            float maxRadiusIgnore = radius * MAX_RADIUS_IGNORE_MOUSE_FACTOR;
+        int centerX = client.getWindow().getScaledWidth() / 2;
+        int centerY = client.getWindow().getScaledHeight() / 2;
 
-            double anglePerItem = 360.0 / totalItemsToDraw;
-            double halfAnglePerItem = anglePerItem * 0.5;
+        float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
+        float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
+        float maxRadiusIgnore = radius * MAX_RADIUS_IGNORE_MOUSE_FACTOR;
 
-            for (int i = 0; i < totalItemsToDraw; i++) {
+        if (totalItemsToDraw == 0 || slotsToDraw.isEmpty()) {
+            return;
+        }
 
-                double angleDeg = anglePerItem * i - 90.0;
+        double anglePerItem = 360.0 / totalItemsToDraw;
+        double halfAnglePerItem = anglePerItem * 0.5;
 
-                int realSlotIndex = slotsToDraw.get(i);
+        for (int i = 0; i < totalItemsToDraw; i++) {
 
-                double checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
-                double checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
-                double adjustedMouseAngle = MathUtils.RelativeAngle(centerX, centerY, mouseX, mouseY);
+            double angleDeg = anglePerItem * i - 90.0;
 
-                double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+            int realSlotIndex = slotsToDraw.get(i);
 
-                boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
-                        MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+            double checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
+            double checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
+            double adjustedMouseAngle = MathUtils.RelativeAngle(centerX, centerY, mouseX, mouseY);
 
-                if (mouseIn) {
-                    handleInventorySwap(realSlotIndex);
-                }
+            double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
+            boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
+
+                    MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+
+            if (mouseIn) {
+                this.itemSelected = true;
+                handleInventorySwap(realSlotIndex);
+                this.lastUsedSlot = initialSlot;
+                this.initialSlot = realSlotIndex;
+                break;
             }
 
         }
@@ -232,21 +297,20 @@ public class RadialMenuScreen extends Screen {
                 selectedStack = stack;
             }
 
-            context.getMatrices().pushMatrix();
+            context.getMatrices().push();
 
-            context.getMatrices().translate(renderX + 8, renderY + 8);
+            context.getMatrices().translate(renderX + 8, renderY + 8, 0);
 
-            context.getMatrices().scale(scale, scale);
-            context.getMatrices().translate(-8, -8);
+            context.getMatrices().scale(scale, scale, 1);
+            context.getMatrices().translate(-8, -8, 0);
 
             context.drawItem(stack, 0, 0);
-            context.drawStackOverlay(textRenderer, stack, 0, 0);
+            context.drawItemInSlot(textRenderer, stack, 0, 0);
 
-            context.getMatrices().popMatrix();
+            context.getMatrices().pop();
 
         }
 
-        //Render selected preview
         if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
             renderCenterItem(context, selectedStack);
         }
@@ -262,18 +326,18 @@ public class RadialMenuScreen extends Screen {
             int centerX = client.getWindow().getScaledWidth() / 2;
             int centerY = client.getWindow().getScaledHeight() / 2;
 
-            context.getMatrices().pushMatrix();
+            context.getMatrices().push();
 
-            context.getMatrices().translate(centerX, centerY);
+            context.getMatrices().translate(centerX, centerY, 0);
 
-            context.getMatrices().scale(centerScale, centerScale);
+            context.getMatrices().scale(centerScale, centerScale, 1);
 
-            context.getMatrices().translate(-8, -8);
+            context.getMatrices().translate(-8, -8, 0);
 
             context.drawItem(itemStack, 0, 0);
-            context.drawStackOverlay(client.textRenderer, itemStack, 0, 0);
+            context.drawItemInSlot(client.textRenderer, itemStack, 0, 0);
 
-            context.getMatrices().popMatrix();
+            context.getMatrices().pop();
 
             String itemName = itemStack.getName().getString();
             int textWidth = client.textRenderer.getWidth(itemName);
@@ -316,7 +380,7 @@ public class RadialMenuScreen extends Screen {
             if (boundKey.getCategory() == InputUtil.Type.MOUSE) { // Similar logic from opening radial menu.
                 isDown = GLFW.glfwGetMouseButton(windowHandle, code) == GLFW.GLFW_PRESS;
             } else {
-                isDown = InputUtil.isKeyPressed(clientWindow, code);
+                isDown = InputUtil.isKeyPressed(clientWindow.getHandle(), code);
             }
 
             key.setPressed(isDown);
@@ -331,12 +395,11 @@ public class RadialMenuScreen extends Screen {
             if (FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor) {
 
                 ItemStack selectedStack = client.player.getInventory().getStack(sourceSlot);
-                EquippableComponent equippable = selectedStack.get(DataComponentTypes.EQUIPPABLE);
+                Item item = selectedStack.getItem();
 
-                if (equippable != null) {
-                    EquipmentSlot slotType = equippable.slot();
-                    boolean isArmorSlot = slotType != null && slotType.isArmorSlot(); //|| slotType == EquipmentSlot.OFFHAND);
-                    // EquipmentSlot.OFFHAND is used to be for check shields and similar items.
+                if (item instanceof ArmorItem armorItem) {
+                    EquipmentSlot slotType = armorItem.getSlotType();
+                    boolean isArmorSlot = slotType != null && slotType.isArmorSlot();
 
                     if (isArmorSlot) {
                         int validSlotId = sourceSlot;
@@ -376,7 +439,6 @@ public class RadialMenuScreen extends Screen {
                                 client.player
                         );
 
-                        //TODO: Make that player can auto equip and select(with some states) in radial menu.
                     } else {
                         HandleInteraction(sourceSlot);
                     }
@@ -388,8 +450,7 @@ public class RadialMenuScreen extends Screen {
             }
 
         } else {
-            // That logic is just placeholder
-            int currentSlot = client.player.getInventory().getSelectedSlot();
+            int currentSlot = client.player.getInventory().selectedSlot;
 
             client.interactionManager.clickSlot(
                     client.player.playerScreenHandler.syncId,
@@ -402,7 +463,7 @@ public class RadialMenuScreen extends Screen {
     }
 
     private void HandleInteraction(int sourceSlot) {
-        client.player.getInventory().setSelectedSlot(sourceSlot);
+        client.player.getInventory().selectedSlot = sourceSlot;
         client.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(sourceSlot));
     }
 

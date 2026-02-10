@@ -1,9 +1,8 @@
 package github.devhrytsan.radialhotbar.utils;
 
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.*;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class MenuUtils {
@@ -22,16 +21,16 @@ public class MenuUtils {
 
         Item item = stack.getItem();
 
-        if (stack.contains(DataComponentTypes.TOOL)) {
+        if (item instanceof ToolItem || item instanceof MiningToolItem || item instanceof ShearsItem) {
             return 0;
         }
-        if (stack.contains(DataComponentTypes.WEAPON)) {
+        if (item instanceof SwordItem || item instanceof RangedWeaponItem || item instanceof TridentItem) {
             return 1;
         }
-        if (stack.contains(DataComponentTypes.FOOD)) {
+        if (item.isFood()) {
             return 2;
         }
-        if (stack.contains(DataComponentTypes.POTION_CONTENTS)) {
+        if (item instanceof PotionItem || item instanceof GlassBottleItem) {
             return 3;
         }
         if (item instanceof BlockItem) {
@@ -43,10 +42,8 @@ public class MenuUtils {
     public static boolean canBeEquipped(ItemStack stack) {
         if (stack.isEmpty()) return false;
 
-        if (stack.contains(DataComponentTypes.EQUIPPABLE)) {
-            return true;
-        }
-        return false;
+        Item item = stack.getItem();
+        return item instanceof Equipment || item instanceof ElytraItem;
     }
 
     public static int getArmorSlot(EquipmentSlot slot) {

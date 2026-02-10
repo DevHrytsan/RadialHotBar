@@ -1,7 +1,6 @@
 package github.devhrytsan.radialhotbar;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import org.lwjgl.glfw.GLFW;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.menu.RadialMenuScreen;
@@ -56,7 +55,7 @@ public class RadialHotBarClient implements ClientModInitializer {
 
         if (keyCode >= 0) {
             boolean radialMenuKeyDown = (boundKey.getCategory() == InputUtil.Type.MOUSE ?
-                    GLFW.glfwGetMouseButton(windowHandle, keyCode) == 1 : InputUtil.isKeyPressed(clientWindow, keyCode));
+                    GLFW.glfwGetMouseButton(windowHandle, keyCode) == 1 : InputUtil.isKeyPressed(clientWindow.getHandle(), keyCode));
 
             if (radialMenuKeyDown != lastRadialMenuState) {
                 if (radialMenuKeyDown != RadialMenuScreen.INSTANCE.active) {
@@ -66,7 +65,7 @@ public class RadialHotBarClient implements ClientModInitializer {
                         }
                     } else {
                         var window = client.getWindow();
-                        RadialMenuScreen.INSTANCE.selectItem(client.mouse.getScaledX(window), client.mouse.getScaledY(window), 0);
+                        RadialMenuScreen.INSTANCE.selectItem(client.mouse.getX() / client.getWindow().getScaleFactor(), client.mouse.getY() / client.getWindow().getScaleFactor(), 0);
                         RadialMenuScreen.INSTANCE.deactivate();
                     }
                 }
