@@ -127,7 +127,7 @@ public class RadialMenuScreen extends Screen {
     public void deactivate() {
         active = false;
         if (client != null && client.player != null) {
-            if (!itemSelected) {
+            if (!itemSelected && FileConfigHandler.CONFIG_INSTANCE.hotSwapClick) {
                 int currentSlot = client.player.getInventory().getSelectedSlot();
 
                 int target = lastUsedSlot;

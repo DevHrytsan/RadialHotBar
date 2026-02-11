@@ -19,5 +19,7 @@
   "config.radialhotbar.option.autoSort": "Автоматичне сортування",
   "config.radialhotbar.option.autoSort.tooltip": "Автоматично сортує предмети за категоріями: інструменти, зброя, їжа, блоки та зілля.",
   "config.radialhotbar.option.autoEquipArmor": "Автоматично одягати броню",
-  "config.radialhotbar.option.autoEquipArmor.tooltip": "Автоматично одягає броню, коли її вибрано в радіальному меню."
+  "config.radialhotbar.option.autoEquipArmor.tooltip": "Автоматично одягає броню, коли її вибрано в радіальному меню.",
+  "config.radialhotbar.option.hotSwapClick": "Швидка зміна слота",
+  "config.radialhotbar.option.hotSwapClick.tooltip": "Натискання клавіші без вибору слота поверне вас до останнього використаного слота."
 }
