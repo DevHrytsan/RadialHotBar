@@ -72,6 +72,12 @@ public class RadialHotBarConfigScreen {
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.radialhotbar.option.hotSwapClick"), FileConfigHandler.CONFIG_INSTANCE.hotSwapClick)
+                .setDefaultValue(true)
+                .setTooltip(Text.translatable("config.radialhotbar.option.hotSwapClick.tooltip"))
+                .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.hotSwapClick = newValue)
+                .build());
+
         return builder.build();
     }
 }

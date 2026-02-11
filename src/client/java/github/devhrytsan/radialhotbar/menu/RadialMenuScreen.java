@@ -44,6 +44,10 @@ public class RadialMenuScreen extends Screen {
     private List<Integer> slotsToDraw;
     private int totalItemsToDraw = 0;
 
+    public int lastUsedSlot = 0;
+    private int initialSlot = 0;
+    private boolean itemSelected = false;
+
     public static final RadialMenuScreen INSTANCE = new RadialMenuScreen();
     public boolean active = false;
 
@@ -100,6 +104,20 @@ public class RadialMenuScreen extends Screen {
 
     public void activate() {
         if (MinecraftClient.getInstance().currentScreen == null) {
+            if (client != null && client.player != null) {
+                int currentSlot = client.player.getInventory().getSelectedSlot();
+
+                // If the player moved to a new slot (via scroll wheel or numbers)
+                // since the last time they used the menu, update our 'Alt' slot
+                // to be the one they just left.
+                if (currentSlot != initialSlot) {
+                    lastUsedSlot = initialSlot;
+                }
+
+                this.initialSlot = currentSlot;
+            }
+
+            this.itemSelected = false;
             // So basically it works it only allows when the player is playing the game and not looking at another menu.
             active = true;
             MinecraftClient.getInstance().setScreen(INSTANCE);
@@ -108,6 +126,18 @@ public class RadialMenuScreen extends Screen {
 
     public void deactivate() {
         active = false;
+        if (client != null && client.player != null) {
+            if (!itemSelected && FileConfigHandler.CONFIG_INSTANCE.hotSwapClick) {
+                int currentSlot = client.player.getInventory().getSelectedSlot();
+
+                int target = lastUsedSlot;
+                lastUsedSlot = currentSlot;
+                initialSlot = target;
+
+                HandleInteraction(target);
+            }
+        }
+
         if (MinecraftClient.getInstance().currentScreen == INSTANCE) {
             MinecraftClient.getInstance().setScreen(null);
         }
@@ -141,7 +171,10 @@ public class RadialMenuScreen extends Screen {
                         MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
                 if (mouseIn) {
+                    this.itemSelected = true;
                     handleInventorySwap(realSlotIndex);
+                    this.lastUsedSlot = initialSlot;
+                    this.initialSlot = realSlotIndex;
                 }
 
             }
