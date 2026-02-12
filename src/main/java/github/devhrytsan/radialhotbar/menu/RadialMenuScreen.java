@@ -1,410 +1,375 @@
 package github.devhrytsan.radialhotbar.menu;
-/*
-import github.devhrytsan.radialhotbar.Constants;
+
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
+import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
+import github.devhrytsan.radialhotbar.utils.GuiGraphicsUtils;
 import github.devhrytsan.radialhotbar.utils.MathUtils;
 import github.devhrytsan.radialhotbar.utils.MenuUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 
-import net.minecraft.client.util.InputUtil;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.EquippableComponent;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
-import org.lwjgl.glfw.GLFW;
+//? if >=1.20.5 {
+import net.minecraft.core.component.DataComponents;
+//? }
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.ArrayList;
 
+@SuppressWarnings({"ConstantConditions", "DataFlowIssue", "FieldMayBeFinal", "unused"})
 public class RadialMenuScreen extends Screen {
 
-    protected static final float GLOBAL_UI_SCALE_FACTOR = 1f;
-    protected static final float BASE_ITEM_RADIUS = 35f;
-    protected static final float BASE_ITEM_SCALE_FACTOR = 1.5f;
-    protected static final float CENTER_ITEM_SCALE_FACTOR = 3f;
+	protected static final float GLOBAL_UI_SCALE_FACTOR = 1f;
+	protected static final float BASE_ITEM_RADIUS = 35f;
+	protected static final float BASE_ITEM_SCALE_FACTOR = 1.5f;
+	protected static final float CENTER_ITEM_SCALE_FACTOR = 3f;
 
-    protected static final float NOT_SELECTED_ITEM_SCALE_FACTOR = 1f;
-    protected static final float SELECTED_ITEM_SCALE_FACTOR = 1.5f;
+	protected static final float NOT_SELECTED_ITEM_SCALE_FACTOR = 1f;
+	protected static final float SELECTED_ITEM_SCALE_FACTOR = 1.5f;
+
+	protected static final float MIN_RADIUS_IGNORE_MOUSE_FACTOR = 0.2f;
+	protected static final float MAX_RADIUS_IGNORE_MOUSE_FACTOR = 6f;
+
+	protected static final int MAX_SLOTS_COUNT = 9;
 
-    protected static final float MIN_RADIUS_IGNORE_MOUSE_FACTOR = 0.2f;
-    protected static final float MAX_RADIUS_IGNORE_MOUSE_FACTOR = 6f;
+	private List<Integer> slotsToDraw;
+	private int totalItemsToDraw = 0;
+
+	private int lastUsedSlot = 0;
+	private int initialSlot = 0;
+	private boolean itemSelected = false;
+
+	private final Minecraft client = Minecraft.getInstance();
+
+	// Maybe should move it to some Service Locator rather than Singleton.
+	// But for a project of that size, it’s not really necessary.
+	public static final RadialMenuScreen INSTANCE = new RadialMenuScreen();
+
+	public boolean active = false;
 
-    protected static final int MAX_SLOTS_COUNT = 9;
+	public RadialMenuScreen() {
+		super(Component.translatable("main.radialhotbar.title"));
+		slotsToDraw = new ArrayList<>(MAX_SLOTS_COUNT);
+	}
+
+	@Override
+	public void init() {
+
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+
+		if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+			//handleMovement();
+		}
+	}
+
+	@Override
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+		super.render(context, mouseX, mouseY, delta);
+
+		boolean isEnabled = FileConfigHandler.CONFIG_INSTANCE.modEnabled;
+		boolean hasScreen = client.screen != null;
+		boolean isPaused = !client.isPaused();
+
+		if (isEnabled && hasScreen && isPaused) {
+			prepareSlots(context, mouseX, mouseY, delta);
+			//RenderBackgrounds(context, mouseX, mouseY, delta);
+			renderItems(context, mouseX, mouseY, delta);
+		}
+	}
+
+	@Override
+	public void removed() { // Cleanup logic that runs automatically when Radial Menu closes
+
+		super.removed();
+		active = false;
+	}
+
+	@Override
+	public boolean isPauseScreen() {
+		return false;
+	}
+
+	@Override
+	public boolean shouldCloseOnEsc() {
+		return true;
+	}
 
-    private List<Integer> slotsToDraw;
-    private int totalItemsToDraw = 0;
+	public void activate() {
+		if (client.screen == null) {
+			if (client != null && client.player != null) {
+				int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
 
-    public static final RadialMenuScreen INSTANCE = new RadialMenuScreen();
-    public boolean active = false;
+				// If the player moved to a new slot (via scroll wheel or numbers)
+				// since the last time they used the menu, update our 'Alt' slot
+				// to be the one they just left.
+				if (currentSlot != initialSlot) {
+					lastUsedSlot = initialSlot;
+				}
 
-    public RadialMenuScreen() {
-        super(Text.translatable("main.radialhotbar.title"));
-        slotsToDraw = new ArrayList<>(MAX_SLOTS_COUNT);
-    }
+				this.initialSlot = currentSlot;
+			}
 
-    @Override
-    public void init() {
+			this.itemSelected = false;
+			// So basically it works it only allows when the player is playing the game and not looking at another menu.
+			active = true;
+			client.setScreen(INSTANCE);
+		}
+	}
 
-    }
+	public void deactivate() {
+		active = false;
 
-    @Override
-    public void tick() {
-        super.tick();
+		if (client != null && client.player != null) {
+			if (!itemSelected && FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect) {
+				int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
 
-        if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
-            handleMovement();
-        }
-    }
+				int target = lastUsedSlot;
+				lastUsedSlot = currentSlot;
+				initialSlot = target;
 
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+				handleInteraction(target);
+			}
+		}
 
-        boolean isEnabled = FileConfigHandler.CONFIG_INSTANCE.modEnabled;
-        boolean hasScreen = client.currentScreen != null;
-        boolean isPaused = !client.isPaused();
+		if (client.screen == INSTANCE) {
+			client.setScreen(null);
+		}
+	}
 
-        if (isEnabled && hasScreen && isPaused) {
-            prepareSlots(context, mouseX, mouseY, delta);
-            //RenderBackgrounds(context, mouseX, mouseY, delta);
-            renderItems(context, mouseX, mouseY, delta);
-        }
-    }
+	private void prepareSlots(GuiGraphics context, int mouseX, int mouseY, float delta) {
+		Player player = this.client.player;
+		Inventory inventory = player.getInventory();
 
-    @Override
-    public void removed() { // Cleanup logic that runs automatically when Radial Menu closes
+		slotsToDraw.clear();
 
-        super.removed();
-        active = false;
-    }
+		for (int i = 0; i < MAX_SLOTS_COUNT; i++) {
+			if (!FileConfigHandler.CONFIG_INSTANCE.hideEmptySlots || !inventory.getItem(i).isEmpty()) {
+				slotsToDraw.add(i);
+			}
+		}
 
-    @Override
-    public boolean shouldPause() {
-        return false;
-    }
+		if (FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots) {
+			slotsToDraw.sort((slotIndexA, slotIndexB) -> {
+				ItemStack stackA = inventory.getItem(slotIndexA);
+				ItemStack stackB = inventory.getItem(slotIndexB);
 
-    @Override
-    public boolean shouldCloseOnEsc() {
-        return true;
-    }
+				// Get category priority (lower number = appears first)
+				int categoryA = MenuUtils.getItemCategoryOrder(stackA);
+				int categoryB = MenuUtils.getItemCategoryOrder(stackB);
 
-    public void activate() {
-        if (MinecraftClient.getInstance().currentScreen == null) {
-            // So basically it works it only allows when the player is playing the game and not looking at another menu.
-            active = true;
-            MinecraftClient.getInstance().setScreen(INSTANCE);
-        }
-    }
+				if (categoryA != categoryB) {
+					return Integer.compare(categoryA, categoryB);
+				}
+				// If categories are the same, sort by item name to keep it
+				return stackA.getHoverName().getString().compareTo(stackB.getHoverName().getString());
+			});
+		}
 
-    public void deactivate() {
-        active = false;
-        if (MinecraftClient.getInstance().currentScreen == INSTANCE) {
-            MinecraftClient.getInstance().setScreen(null);
-        }
-    }
+		totalItemsToDraw = slotsToDraw.size();
+	}
 
-    public void selectItem(double mouseX, double mouseY, int button) {
-        if (active) {
-            int centerX = client.getWindow().getScaledWidth() / 2;
-            int centerY = client.getWindow().getScaledHeight() / 2;
+	private void renderItems(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
-            float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
-            float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
-            float maxRadiusIgnore = radius * MAX_RADIUS_IGNORE_MOUSE_FACTOR;
+		var clientWindow = client.getWindow();
+		Player player = this.client.player;
+		Inventory inventory = player.getInventory();
+		var textRenderer = client.font;
 
-            double anglePerItem = 360.0 / totalItemsToDraw;
-            double halfAnglePerItem = anglePerItem * 0.5;
+		int centerX = clientWindow.getGuiScaledWidth() / 2;
+		int centerY = clientWindow.getGuiScaledHeight() / 2;
 
-            for (int i = 0; i < totalItemsToDraw; i++) {
+		float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
+		float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
+		float maxRadiusIgnore = radius * MAX_RADIUS_IGNORE_MOUSE_FACTOR;
 
-                double angleDeg = anglePerItem * i - 90.0;
+		double anglePerItem = 360.0 / totalItemsToDraw;
+		double halfAnglePerItem = anglePerItem * 0.5;
 
-                int realSlotIndex = slotsToDraw.get(i);
+		ItemStack selectedStack = ItemStack.EMPTY; //Maybe I should do with ID
 
-                double checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
-                double checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
-                double adjustedMouseAngle = MathUtils.RelativeAngle(centerX, centerY, mouseX, mouseY);
+		for (int i = 0; i < totalItemsToDraw; i++) {
 
-                double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+			//double angleRad = (2 * Math.PI / totalItemsToDraw) * i - (Math.PI / 2);// Radians
+			//double angleDeg = anglePerItem * i - 90.0; // Degrees
 
-                boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
-                        MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+			double angleDeg = anglePerItem * i - 90.0;
+			double angleRad = Math.toRadians(angleDeg);
 
-                if (mouseIn) {
-                    handleInventorySwap(realSlotIndex);
-                }
+			int realSlotIndex = slotsToDraw.get(i);
 
-            }
+			int x = (int) (centerX + radius * Math.cos(angleRad));
+			int y = (int) (centerY + radius * Math.sin(angleRad));
 
-        }
-    }
+			int renderX = x - 8;
+			int renderY = y - 8;
 
-    private void prepareSlots(DrawContext context, int mouseX, int mouseY, float delta) {
-        PlayerEntity player = this.client.player;
+			double checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
+			double checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
+			boolean mouseIn;
 
-        slotsToDraw.clear();
+			double adjustedMouseAngle = MathUtils.RelativeAngle(centerX, centerY, mouseX, mouseY);
 
-        for (int i = 0; i < MAX_SLOTS_COUNT; i++) {
-            if (!FileConfigHandler.CONFIG_INSTANCE.hideEmptySlots || !player.getInventory().getStack(i).isEmpty()) {
-                slotsToDraw.add(i);
-            }
-        }
+			double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
-        if (FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots) {
-            slotsToDraw.sort((slotIndexA, slotIndexB) -> {
-                ItemStack stackA = player.getInventory().getStack(slotIndexA);
-                ItemStack stackB = player.getInventory().getStack(slotIndexB);
+			mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ?
+					MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
-                // Get category priority (lower number = appears first)
-                int categoryA = MenuUtils.getItemCategoryOrder(stackA);
-                int categoryB = MenuUtils.getItemCategoryOrder(stackB);
+			float scale = mouseIn ? BASE_ITEM_SCALE_FACTOR * SELECTED_ITEM_SCALE_FACTOR : BASE_ITEM_SCALE_FACTOR * NOT_SELECTED_ITEM_SCALE_FACTOR;
 
-                if (categoryA != categoryB) {
-                    return Integer.compare(categoryA, categoryB);
-                }
-                // If categories are the same, sort by item name to keep it
-                return stackA.getName().getString().compareTo(stackB.getName().getString());
-            });
-        }
+			ItemStack stack = inventory.getItem(realSlotIndex);
 
-        totalItemsToDraw = slotsToDraw.size();
-    }
+			if (mouseIn) {
+				selectedStack = stack;
+			}
 
-    private void renderItems(DrawContext context, int mouseX, int mouseY, float delta) {
+			GuiGraphicsUtils.PushMatrix(context);
 
-        int centerX = client.getWindow().getScaledWidth() / 2;
-        int centerY = client.getWindow().getScaledHeight() / 2;
+			GuiGraphicsUtils.TranslateMatrix(context,renderX + 8, renderY + 8, 0);
 
-        PlayerEntity player = this.client.player;
-        TextRenderer textRenderer = client.textRenderer;
+			GuiGraphicsUtils.ScaleMatrix(context, scale, scale,1);
+			GuiGraphicsUtils.TranslateMatrix(context, -8, -8,0);
 
-        float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
-        float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
-        float maxRadiusIgnore = radius * MAX_RADIUS_IGNORE_MOUSE_FACTOR;
+			GuiGraphicsUtils.RenderItem(context, stack, 0, 0);
+			GuiGraphicsUtils.RenderItemDecoration(context, textRenderer, stack, 0, 0);
 
-        double anglePerItem = 360.0 / totalItemsToDraw;
-        double halfAnglePerItem = anglePerItem * 0.5;
+			GuiGraphicsUtils.PopMatrix(context);
 
-        ItemStack selectedStack = ItemStack.EMPTY; //Maybe I should do with ID
+			//Render selected preview
+			if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
+				renderCenterItem(context, selectedStack);
+			}
+		}
 
-        for (int i = 0; i < totalItemsToDraw; i++) {
+	}
 
-            //double angleRad = (2 * Math.PI / totalItemsToDraw) * i - (Math.PI / 2);// Radians
-            //double angleDeg = anglePerItem * i - 90.0; // Degrees
+	private void renderCenterItem(GuiGraphics context, ItemStack itemStack) {
+		if (!itemStack.isEmpty()) {
 
-            double angleDeg = anglePerItem * i - 90.0;
-            double angleRad = Math.toRadians(angleDeg);
+			var clientWindow = client.getWindow();
+			Player player = this.client.player;
+			Inventory inventory = player.getInventory();
+			var textRenderer = client.font;
 
-            int realSlotIndex = slotsToDraw.get(i);
+			float centerScale = CENTER_ITEM_SCALE_FACTOR;
+			float itemSize = centerScale * 16;
+			float halfItemSize = itemSize * 0.5f;
 
-            int x = (int) (centerX + radius * Math.cos(angleRad));
-            int y = (int) (centerY + radius * Math.sin(angleRad));
+			int centerX = client.getWindow().getGuiScaledWidth() / 2;
+			int centerY = client.getWindow().getGuiScaledHeight() / 2;
 
-            int renderX = x - 8;
-            int renderY = y - 8;
+			GuiGraphicsUtils.PushMatrix(context);
 
-            double checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
-            double checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
-            boolean mouseIn;
+			GuiGraphicsUtils.TranslateMatrix(context, centerX, centerY, 0);
 
-            double adjustedMouseAngle = MathUtils.RelativeAngle(centerX, centerY, mouseX, mouseY);
+			GuiGraphicsUtils.ScaleMatrix(context,centerScale, centerScale,1);
 
-            double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+			GuiGraphicsUtils.TranslateMatrix(context,-8, -8,0);
 
-            mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
-                    MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+			GuiGraphicsUtils.RenderItem(context, itemStack, 0, 0);
+			GuiGraphicsUtils.RenderItemDecoration(context, textRenderer, itemStack, 0, 0);
 
-            float scale = mouseIn ? BASE_ITEM_SCALE_FACTOR * SELECTED_ITEM_SCALE_FACTOR : BASE_ITEM_SCALE_FACTOR * NOT_SELECTED_ITEM_SCALE_FACTOR;
+			GuiGraphicsUtils.PopMatrix(context);
 
-            ItemStack stack = player.getInventory().getStack(realSlotIndex);
+			String itemName = itemStack.getHoverName().getString();
+			int textWidth = textRenderer.width(itemName);
 
-            if (mouseIn) {
-                selectedStack = stack;
-            }
+			GuiGraphicsUtils.DrawString(context,
+					textRenderer,
+					itemName,
+					centerX - (textWidth / 2),
+					centerY + (int) halfItemSize + 5,
+					0xFFFFFFFF,
+					true
+			);
+		}
+	}
 
-            context.getMatrices().pushMatrix();
+	private void handleInteraction(int sourceSlot) {
 
-            context.getMatrices().translate(renderX + 8, renderY + 8);
+		ClientPlayerUtils.setPlayerSelectedSlot(client.player, sourceSlot);
 
-            context.getMatrices().scale(scale, scale);
-            context.getMatrices().translate(-8, -8);
+		if (client.getConnection() != null) {
+			client.getConnection().send(new ServerboundSetCarriedItemPacket(sourceSlot));
+		}
+	}
 
-            context.drawItem(stack, 0, 0);
-            context.drawStackOverlay(textRenderer, stack, 0, 0);
+	private void handleInventorySwap(int sourceSlot) {
 
-            context.getMatrices().popMatrix();
+		if (sourceSlot >= 0 && sourceSlot < 9) {
 
-        }
+			if (FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor) {
 
-        //Render selected preview
-        if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
-            renderCenterItem(context, selectedStack);
-        }
+				ItemStack selectedStack = client.player.getInventory().getItem(sourceSlot);
 
-    }
+				EquipmentSlot targetSlotType = null;
 
-    private void renderCenterItem(DrawContext context, ItemStack itemStack) {
-        if (!itemStack.isEmpty()) {
-            float centerScale = CENTER_ITEM_SCALE_FACTOR;
-            float itemSize = centerScale * 16;
-            float halfItemSize = itemSize * 0.5f;
+				//? if >=1.21.5 {
+				// Modern just using Data
+				var equippable = selectedStack.get(DataComponents.EQUIPPABLE);
+				if (equippable != null) {
+					targetSlotType = equippable.slot();
+				}
+				//? } else {
 
-            int centerX = client.getWindow().getScaledWidth() / 2;
-            int centerY = client.getWindow().getScaledHeight() / 2;
+				/*// Legacy: Asking the entity where this item belongs
+				targetSlotType = client.player.getEquipmentSlotForItem(selectedStack);
 
-            context.getMatrices().pushMatrix();
+				*///? }
 
-            context.getMatrices().translate(centerX, centerY);
 
-            context.getMatrices().scale(centerScale, centerScale);
+				if (targetSlotType != null) {
 
-            context.getMatrices().translate(-8, -8);
+					boolean isArmorSlot = targetSlotType != null && targetSlotType.isArmor(); //|| slotType == EquipmentSlot.OFFHAND);
+					// EquipmentSlot.OFFHAND is used to be for check shields and similar items.
 
-            context.drawItem(itemStack, 0, 0);
-            context.drawStackOverlay(client.textRenderer, itemStack, 0, 0);
+					if (isArmorSlot) {
+						int validSlotId = sourceSlot;
 
-            context.getMatrices().popMatrix();
+						if (sourceSlot >= 0 && sourceSlot <= 8) {
+							validSlotId = sourceSlot + 36;
 
-            String itemName = itemStack.getName().getString();
-            int textWidth = client.textRenderer.getWidth(itemName);
+							// If it's in main inventory (9-35) mapped ID is generally same (9-35) in PlayerScreenHandler
+							// BUT if sourceSlot logic includes the hotbar or treats inv rows separately.
+							// In Standard Player Inventory: main is 9-35, hotbar is 0-8.
+							// In ScreenHandler: main is 9-35, hotbar is 36-44.
+						}
 
-            context.drawText(
-                    client.textRenderer,
-                    itemName,
-                    centerX - (textWidth / 2),
-                    centerY + (int) halfItemSize + 5, // Half the item height, +5 for padding
-                    0xFFFFFFFF,
-                    true
-            );
-        }
-    }
+						int armorSlotId = MenuUtils.getArmorSlot(targetSlotType);
 
-    private void handleMovement() {
-        if (this.client == null || this.client.player == null) return;
-        var clientWindow = client.getWindow();
-        long windowHandle = clientWindow.getHandle();
+						ClientPlayerUtils.HandleMouseClickPickup(client, validSlotId);
+						ClientPlayerUtils.HandleMouseClickPickup(client, armorSlotId);
+						ClientPlayerUtils.HandleMouseClickPickup(client, validSlotId);
 
-        KeyBinding[] keysToKeep = new KeyBinding[]{
-                this.client.options.forwardKey,
-                this.client.options.backKey,
-                this.client.options.leftKey,
-                this.client.options.rightKey,
-                this.client.options.jumpKey,
-                this.client.options.sprintKey,
-                this.client.options.sneakKey
-        };
+						//TODO: Make that player can auto equip and select(with some states) in radial menu.
+					} else {
+						handleInteraction(sourceSlot);
+					}
+				} else {
+					handleInteraction(sourceSlot);
+				}
+			} else {
+				handleInteraction(sourceSlot);
+			}
 
-        for (KeyBinding key : keysToKeep) {
-            InputUtil.Key boundKey = KeyBindingHelper.getBoundKeyOf(key);
-            int code = boundKey.getCode();
+		} else {
+			// That logic is just placeholder
+			int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
 
-            // Skip unbound keys
-            if (code == -1) continue;
+			ClientPlayerUtils.HandleMouseClickSwap(client, currentSlot, sourceSlot);
+		}
+	}
 
-            boolean isDown = false;
-
-            if (boundKey.getCategory() == InputUtil.Type.MOUSE) { // Similar logic from opening radial menu.
-                isDown = GLFW.glfwGetMouseButton(windowHandle, code) == GLFW.GLFW_PRESS;
-            } else {
-                isDown = InputUtil.isKeyPressed(clientWindow, code);
-            }
-
-            key.setPressed(isDown);
-        }
-
-    }
-
-    private void handleInventorySwap(int sourceSlot) {
-
-        if (sourceSlot >= 0 && sourceSlot < 9) {
-
-            if (FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor) {
-
-                ItemStack selectedStack = client.player.getInventory().getStack(sourceSlot);
-                EquippableComponent equippable = selectedStack.get(DataComponentTypes.EQUIPPABLE);
-
-                if (equippable != null) {
-                    EquipmentSlot slotType = equippable.slot();
-                    boolean isArmorSlot = slotType != null && slotType.isArmorSlot(); //|| slotType == EquipmentSlot.OFFHAND);
-                    // EquipmentSlot.OFFHAND is used to be for check shields and similar items.
-
-                    if (isArmorSlot) {
-                        int validSlotId = sourceSlot;
-
-                        if (sourceSlot >= 0 && sourceSlot <= 8) {
-                            validSlotId = sourceSlot + 36;
-
-                            // If it's in main inventory (9-35) mapped ID is generally same (9-35) in PlayerScreenHandler
-                            // BUT if sourceSlot logic includes the hotbar or treats inv rows separately.
-                            // In Standard Player Inventory: main is 9-35, hotbar is 0-8.
-                            // In ScreenHandler: main is 9-35, hotbar is 36-44.
-                        }
-
-                        int armorSlotId = MenuUtils.getArmorSlot(slotType);
-
-                        client.interactionManager.clickSlot(
-                                client.player.playerScreenHandler.syncId,
-                                validSlotId,
-                                0,
-                                SlotActionType.PICKUP,
-                                client.player
-                        );
-
-                        client.interactionManager.clickSlot(
-                                client.player.playerScreenHandler.syncId,
-                                armorSlotId,
-                                0,
-                                SlotActionType.PICKUP,
-                                client.player
-                        );
-
-                        client.interactionManager.clickSlot(
-                                client.player.playerScreenHandler.syncId,
-                                validSlotId,
-                                0,
-                                SlotActionType.PICKUP,
-                                client.player
-                        );
-
-                        //TODO: Make that player can auto equip and select(with some states) in radial menu.
-                    } else {
-                        HandleInteraction(sourceSlot);
-                    }
-                } else {
-                    HandleInteraction(sourceSlot);
-                }
-            } else {
-                HandleInteraction(sourceSlot);
-            }
-
-        } else {
-            // That logic is just placeholder
-            int currentSlot = client.player.getInventory().getSelectedSlot();
-
-            client.interactionManager.clickSlot(
-                    client.player.playerScreenHandler.syncId,
-                    sourceSlot,
-                    currentSlot,
-                    SlotActionType.SWAP,
-                    client.player
-            );
-        }
-    }
-
-    private void HandleInteraction(int sourceSlot) {
-        client.player.getInventory().setSelectedSlot(sourceSlot);
-        client.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(sourceSlot));
-    }
 
 }
-*/

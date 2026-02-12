@@ -1,5 +1,6 @@
 package github.devhrytsan.radialhotbar.utils;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.*;
 
@@ -81,7 +82,6 @@ public class MenuUtils {
 		return 5;
 	}
 
-
 	public static boolean canBeEquipped(ItemStack stack) {
 		if (stack.isEmpty()) return false;
 
@@ -114,4 +114,5 @@ public class MenuUtils {
 		}
 		return armorSlotId;
 	}
+
 }
