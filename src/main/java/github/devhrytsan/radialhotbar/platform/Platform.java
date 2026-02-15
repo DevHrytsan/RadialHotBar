@@ -13,6 +13,8 @@ public interface Platform {
 		return isDevelopmentEnvironment();
 	}
 
+	java.nio.file.Path getConfigDirectory();
+
 	enum ModLoader {
 		FABRIC, NEOFORGE, FORGE, QUILT
 	}

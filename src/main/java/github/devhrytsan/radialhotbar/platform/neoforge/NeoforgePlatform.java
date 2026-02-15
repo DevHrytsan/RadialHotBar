@@ -6,6 +6,7 @@ package github.devhrytsan.radialhotbar.platform.neoforge;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.VersionInfo;
+import net.neoforged.fml.loading.FMLPaths;
 
 public class NeoforgePlatform implements Platform {
 
@@ -27,6 +28,11 @@ public class NeoforgePlatform implements Platform {
 	@Override
 	public boolean isDevelopmentEnvironment() {
 		return !FMLLoader/^? if > 1.21.7 {^//^.getCurrent()^//^?}^/.isProduction();
+	}
+
+	@Override
+	public java.nio.file.Path getConfigDirectory() {
+		return FMLPaths.CONFIGDIR.get();
 	}
 }
 *///?}

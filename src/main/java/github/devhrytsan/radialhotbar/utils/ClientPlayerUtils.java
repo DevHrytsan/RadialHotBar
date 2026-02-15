@@ -11,10 +11,10 @@ public class ClientPlayerUtils {
 		//? if >=1.21.5 {
 		return clientWindow.handle();
 		//? } else {
-		/*
-		return clientWindow.getWindow();
-		*/
-		//? }
+		
+		/*return clientWindow.getWindow();
+		
+		*///? }
 	}
 
 	public static int getPlayerSelectedSlot(LocalPlayer player) {

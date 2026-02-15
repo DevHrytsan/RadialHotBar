@@ -50,12 +50,18 @@ neoForge {
 
 repositories {
 	mavenCentral()
+	maven("https://maven.shedaniel.me/")
+	maven("https://maven.neoforged.net/releases/")
+
+	strictMaven("https://maven.terraformersmc.com/", "com.terraformersmc") { name = "TerraformersMC" }
 	strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
 }
 
 dependencies {
 	implementation(libs.moulberry.mixinconstraints)
 	jarJar(libs.moulberry.mixinconstraints)
+
+	implementation("me.shedaniel.cloth:cloth-config-neoforge:${prop("deps.cloth_config")}")
 }
 
 tasks.named("createMinecraftArtifacts") {

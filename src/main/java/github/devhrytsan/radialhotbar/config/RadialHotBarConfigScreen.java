@@ -49,7 +49,7 @@ public class RadialHotBarConfigScreen {
                 .build());
 
         general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.useCenterItemPreview"), FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview)
-                .setDefaultValue(false)
+                .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.radialhotbar.option.useCenterItemPreview.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview = newValue)
                 .build());

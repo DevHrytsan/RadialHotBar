@@ -14,14 +14,14 @@ public class KeyInputUtils {
 		//? fabric {
 		return KeyBindingHelper.getBoundKeyOf(keyBinding);
 		//?} neoforge {
-		/*
-		return keyBinding.getKey(); // it may be wrong
-		*/
-		//?} forge {
-		/*
-		return keyBinding.getKey();
-		*/
-		//?}
+		
+		/*return keyBinding.getKey(); // it may be wrong
+		
+		*///?} forge {
+		
+		/*return keyBinding.getKey();
+		
+		*///?}
 
 	}
 
@@ -29,10 +29,10 @@ public class KeyInputUtils {
 		//? if >=1.21.5 {
 		return InputConstants.isKeyDown(window, keyCode);
 		//? } else {
-		/*
-		long handle = ClientPlayerUtils.GetWindowHandle(window);
+		
+		/*long handle = ClientPlayerUtils.GetWindowHandle(window);
 		return InputConstants.isKeyDown(handle, keyCode);
-		*/
-		//? }
+		
+		*///? }
 	}
 }

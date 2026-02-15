@@ -2,9 +2,7 @@ package github.devhrytsan.radialhotbar.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import github.devhrytsan.radialhotbar.Constants;
 import github.devhrytsan.radialhotbar.RadialHotBarMod;
-import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
 import java.io.FileReader;
@@ -13,7 +11,7 @@ import java.io.IOException;
 
 public class FileConfigHandler {
     public static RadialHotBarConfig CONFIG_INSTANCE = new RadialHotBarConfig();
-    protected static File settingsFile = FabricLoader.getInstance().getConfigDir().resolve("radialhotbar.json").toFile();
+	protected static File settingsFile = RadialHotBarMod.PLATFORM.getConfigDirectory().resolve("radialhotbar.json").toFile();
     protected static Gson baseGson = new GsonBuilder().setPrettyPrinting().create();
 
     public static void loadConfig() {
