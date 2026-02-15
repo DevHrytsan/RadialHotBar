@@ -13,11 +13,11 @@ import net.minecraft.core.component.DataComponents;
 //? }
 
 //? if <1.21.1 {
-/*
-import com.mojang.blaze3d.systems.RenderSystem;
+
+/*import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.platform.GlStateManager;
-*/
-//? }
+
+*///? }
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -251,15 +251,15 @@ public class RadialMenuScreen extends Screen {
 
 	private void renderBackgrounds(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		//? if <1.21.1 {
-			/*
+			
 
-			int color = 0x80000000;
+			/*int color = 0x80000000;
 
 			GuiGraphicsUtils.PushMatrix(context);
 	        context.fill(0, 0, width, height, color);
 			GuiGraphicsUtils.PopMatrix(context);
-			*/
-		//? }
+			
+		*///? }
 	}
 	private void renderItems(GuiGraphics context, int mouseX, int mouseY, float delta) {
 

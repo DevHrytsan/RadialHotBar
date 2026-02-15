@@ -53,6 +53,11 @@ mixin {
 
 repositories {
 	mavenCentral()
+
+	maven("https://maven.shedaniel.me/")
+	maven("https://files.minecraftforge.net/maven/")
+
+	strictMaven("https://maven.terraformersmc.com/", "com.terraformersmc") { name = "TerraformersMC" }
 	strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
 }
 
@@ -61,6 +66,8 @@ dependencies {
 
 	implementation(libs.moulberry.mixinconstraints)
 	jarJar(libs.moulberry.mixinconstraints)
+
+	implementation("me.shedaniel.cloth:cloth-config-forge:${prop("deps.cloth_config")}")
 }
 
 sourceSets {

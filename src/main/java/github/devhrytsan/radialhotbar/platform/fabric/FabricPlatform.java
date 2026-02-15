@@ -5,6 +5,8 @@ package github.devhrytsan.radialhotbar.platform.fabric;
 import github.devhrytsan.radialhotbar.platform.Platform;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.nio.file.Path;
+
 public class FabricPlatform implements Platform {
 
 	@Override
@@ -25,6 +27,11 @@ public class FabricPlatform implements Platform {
 	@Override
 	public boolean isDevelopmentEnvironment() {
 		return FabricLoader.getInstance().isDevelopmentEnvironment();
+	}
+
+	@Override
+	public Path getConfigDirectory() {
+		return net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir();
 	}
 }
 //?}
