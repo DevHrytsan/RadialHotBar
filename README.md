@@ -13,11 +13,12 @@ In the branches, you can find legacy versions of the mod that previously used a 
 
 ## Support version    
 Currently supported platforms and versions:
-- Fabric 1.20.1
-- Fabric 1.21.1+
-- Fabric 1.21.10
+- 1.20.1 Fabric
+- 1.21.1 Fabric, NeoForge
+- 1.21.10 Fabric, NeoForge
+- 1.21.11 Fabric, NeoForge
 
-Support for Forge and NeoForge is planned for future releases.
+Support for Forge is planned for future releases.
 
 ### Download Links
 You can download Radial Hot Bar from the following platforms:
