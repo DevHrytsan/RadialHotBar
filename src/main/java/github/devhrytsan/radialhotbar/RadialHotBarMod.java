@@ -5,10 +5,13 @@ import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.menu.RadialMenuController;
 import github.devhrytsan.radialhotbar.menu.RadialMenuMovementController;
 import github.devhrytsan.radialhotbar.menu.RadialMenuScreen;
+import github.devhrytsan.radialhotbar.config.RadialHotBarConfigScreen;
+
 import github.devhrytsan.radialhotbar.platform.Platform;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
 
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -118,8 +121,8 @@ public class RadialHotBarMod {
 			if (clientI.screen instanceof RadialMenuScreen) {
 				if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
 					boolean isMenuActive = RadialMenuScreen.INSTANCE.active;
-					RadialMenuMovementHandler.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
-					RadialMenuMovementHandler.INSTANCE.handleMovement();
+					RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
+					RadialMenuMovementController.INSTANCE.handleMovement();
 				}
 			}
 		});
