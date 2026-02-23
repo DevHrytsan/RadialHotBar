@@ -199,7 +199,6 @@ public class RadialMenuScreen extends Screen {
 			double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
 			boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
-
 					MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
 			if (mouseIn) {
@@ -257,6 +256,7 @@ public class RadialMenuScreen extends Screen {
 
 		*///? }
 	}
+
 	private void renderItems(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		var clientWindow = client.getWindow();
