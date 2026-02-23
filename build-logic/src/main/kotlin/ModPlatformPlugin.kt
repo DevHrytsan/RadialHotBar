@@ -23,9 +23,27 @@ import javax.inject.Inject
 
 fun Project.prop(name: String): String = (findProperty(name) ?: "") as String
 
-fun Project.env(variable: String): String? = providers.environmentVariable(variable).orNull
+fun Project.env(variable: String): String? {
+	val envFile = rootProject.file(".env")
+	if (!envFile.exists()) return System.getenv(variable)
 
-fun Project.envTrue(variable: String): Boolean = env(variable)?.toDefaultLowerCase() == "true"
+	// Read the file line by line and manually split
+	val lines = envFile.readLines()
+	for (line in lines) {
+		val trimmed = line.trim()
+		if (trimmed.isEmpty() || trimmed.startsWith("#")) continue
+
+		val parts = trimmed.split("=", limit = 2)
+		if (parts.size == 2 && parts[0].trim() == variable) {
+			return parts[1].trim().removeSurrounding("\"").removeSurrounding("'")
+		}
+	}
+	return System.getenv(variable)
+}
+
+fun Project.envTrue(variable: String): Boolean {
+	return env(variable).equals("true", ignoreCase = true)
+}
 
 fun RepositoryHandler.strictMaven(
 	url: String, vararg groups: String, configure: MavenArtifactRepository.() -> Unit = {}
