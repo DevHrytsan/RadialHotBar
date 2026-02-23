@@ -78,10 +78,6 @@ public class RadialMenuScreen extends Screen {
 	@Override
 	public void tick() {
 		super.tick();
-
-		if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
-			handleMovement();
-		}
 	}
 
 	@Override
@@ -203,7 +199,6 @@ public class RadialMenuScreen extends Screen {
 			double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
 			boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
-
 					MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
 			if (mouseIn) {
@@ -251,16 +246,17 @@ public class RadialMenuScreen extends Screen {
 
 	private void renderBackgrounds(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		//? if <1.21.1 {
-			
+
 
 			/*int color = 0x80000000;
 
 			GuiGraphicsUtils.PushMatrix(context);
 	        context.fill(0, 0, width, height, color);
 			GuiGraphicsUtils.PopMatrix(context);
-			
+
 		*///? }
 	}
+
 	private void renderItems(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		var clientWindow = client.getWindow();
@@ -451,40 +447,4 @@ public class RadialMenuScreen extends Screen {
 			ClientPlayerUtils.handleMouseClickSwap(client, currentSlot, sourceSlot);
 		}
 	}
-
-	private void handleMovement() {
-		if (this.client == null || this.client.player == null) return;
-		var clientWindow = client.getWindow();
-		long windowHandle = ClientPlayerUtils.GetWindowHandle(clientWindow);
-
-		KeyMapping[] keysToKeep = new KeyMapping[]{
-				this.client.options.keyUp,
-				this.client.options.keyDown,
-				this.client.options.keyLeft,
-				this.client.options.keyRight,
-				this.client.options.keyJump,
-				this.client.options.keySprint,
-				this.client.options.keyShift
-		};
-
-		for (KeyMapping key : keysToKeep) {
-			InputConstants.Key boundKey = KeyInputUtils.GetBoundKey(key);
-			int code = boundKey.getValue();
-
-			// Skip unbound keys
-			if (code == -1) continue;
-
-			boolean isDown = false;
-
-			if (boundKey.getType() == InputConstants.Type.MOUSE) { // Similar logic from opening radial menu.
-				isDown = GLFW.glfwGetMouseButton(windowHandle, code) == GLFW.GLFW_PRESS;
-			} else {
-				isDown = KeyInputUtils.isKeyDown(clientWindow, code);
-			}
-
-			key.setDown(isDown);
-		}
-
-	}
-
 }

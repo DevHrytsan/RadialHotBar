@@ -2,13 +2,16 @@ package github.devhrytsan.radialhotbar;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
-import github.devhrytsan.radialhotbar.config.RadialHotBarConfigScreen;
 import github.devhrytsan.radialhotbar.menu.RadialMenuController;
+import github.devhrytsan.radialhotbar.menu.RadialMenuMovementController;
+import github.devhrytsan.radialhotbar.menu.RadialMenuScreen;
+import github.devhrytsan.radialhotbar.config.RadialHotBarConfigScreen;
+
 import github.devhrytsan.radialhotbar.platform.Platform;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
 
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -29,7 +32,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
- *///?} forge {
+		*///?} forge {
 /*import github.devhrytsan.radialhotbar.platform.forge.ForgePlatform;
 
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -53,11 +56,11 @@ public class RadialHotBarMod {
 
 	//? if >=1.21.5 {
 	public static final KeyMapping.Category KEYBIND_CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(RadialHotBarMod.MOD_ID, "general"));
-	 //? } else {
+	//? } else {
 
 	/*public static final String KEYBIND_CATEGORY = "key.category." + MOD_ID + ".general";
 
-	*///? }
+	 *///? }
 
 	public static final Platform PLATFORM = createPlatformInstance();
 
@@ -86,6 +89,10 @@ public class RadialHotBarMod {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			RadialMenuController.INSTANCE.HandleUpdate(client);
+
+			if (client.screen instanceof RadialMenuScreen) {
+				if(FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) RadialMenuMovementController.INSTANCE.handleMovement();
+			}
 		});
 	}
 	//?} neoforge {
@@ -109,6 +116,14 @@ public class RadialHotBarMod {
 			// Call your update logic here
 			if (clientI.player != null) {
 				RadialMenuController.INSTANCE.HandleUpdate(clientI);
+			}
+
+			if (clientI.screen instanceof RadialMenuScreen) {
+				if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+					boolean isMenuActive = RadialMenuScreen.INSTANCE.active;
+					RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
+					RadialMenuMovementController.INSTANCE.handleMovement();
+				}
 			}
 		});
 
@@ -158,8 +173,8 @@ public class RadialHotBarMod {
 		return new FabricPlatform();
 		 //?} neoforge {
 		/*return new NeoforgePlatform();
-		 *///?} forge {
+		*///?} forge {
 		/*return new ForgePlatform();
-		*///?}
+		 *///?}
 	}
 }
