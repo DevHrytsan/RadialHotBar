@@ -16,6 +16,10 @@ platform {
 		required("fabricloader") {
 			versionRange = ">=${libs.fabric.loader.get().version}"
 		}
+		required(modid = "cloth-config") {
+			slug("cloth-config")
+			versionRange = ">=${prop("deps.cloth-config")}"
+		}
 		optional("modmenu") {}
 	}
 }
