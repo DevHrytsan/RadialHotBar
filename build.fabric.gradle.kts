@@ -18,7 +18,7 @@ platform {
 		}
 		required(modid = "cloth-config") {
 			slug("cloth-config")
-			versionRange = ">=${prop("deps.cloth-config")}"
+			versionRange = ">=${prop("deps.cloth_config")}"
 		}
 		optional("modmenu") {}
 	}
