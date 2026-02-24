@@ -12,6 +12,10 @@ platform {
 		required("neoforge") {
 			forgeVersionRange = "[1,)"
 		}
+		required(modid = "cloth-config") {
+			slug("cloth-config")
+			versionRange = ">=${prop("deps.cloth-config")}"
+		}
 	}
 }
 
