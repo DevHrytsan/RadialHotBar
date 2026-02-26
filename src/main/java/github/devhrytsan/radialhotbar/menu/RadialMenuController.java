@@ -23,10 +23,6 @@ public class RadialMenuController {
 		boolean isEnabled = FileConfigHandler.CONFIG_INSTANCE.modEnabled;
 
 		var clientWindow = client.getWindow();
-		long windowHandle = ClientPlayerUtils.GetWindowHandle(clientWindow);
-
-		InputConstants.Key boundKey = KeyInputUtils.GetBoundKey(RadialHotBarMod.OPEN_RADIAL_MENU_KEY);
-		int keyCode = boundKey.getValue();
 
 		// Seriously,
 		// due how Minecraft handles inputs when a Screen is open. So when a Menu opens, Minecraft stops updating gameplay keys.
@@ -34,9 +30,7 @@ public class RadialMenuController {
 		// So for it, I need a hardware check of the button.
 		// Thanks to mod called "MineMenu" I learnt how to deal with it.
 		if (isEnabled) {
-			if (keyCode >= 0) {
-				boolean radialMenuKeyDown = (boundKey.getType() == InputConstants.Type.MOUSE ?
-						GLFW.glfwGetMouseButton(windowHandle, keyCode) == 1 : KeyInputUtils.isKeyDown(clientWindow, keyCode));
+				boolean radialMenuKeyDown = KeyInputUtils.isHardwareKeyPressed(RadialHotBarMod.OPEN_RADIAL_MENU_KEY, clientWindow);
 
 				if (radialMenuKeyDown != lastRadialMenuState) {
 					if (radialMenuKeyDown != RadialMenuScreen.INSTANCE.active) {
@@ -57,7 +51,6 @@ public class RadialMenuController {
 					}
 				}
 				lastRadialMenuState = radialMenuKeyDown;
-			}
 		} else {
 			if (RadialMenuScreen.INSTANCE.active) RadialMenuScreen.INSTANCE.deactivate(0, 0);
 		}
