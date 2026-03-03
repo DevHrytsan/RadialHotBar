@@ -8,6 +8,8 @@
   "config.radialhotbar.option.enabled.tooltip": "Вмикає або вимикає мод.",
   "config.radialhotbar.option.scaleFactor": "Фактор масштабу",
   "config.radialhotbar.option.scaleFactor.tooltip": "Керує тим, наскільки великою буде радіальна панель на екрані.",
+  "config.radialhotbar.option.toggleMode": "Увімкнути режим перемикання",
+  "config.radialhotbar.option.toggleMode.tooltip": "Радіальне меню залишається відкритим після натискання клавіші та закривається при повторному натисканні. Для вибору використовується ліва кнопка миші (ЛКМ).",
   "config.radialhotbar.option.shownames": "Показувати назви предметів",
   "config.radialhotbar.option.shownames.tooltip": "Показує назви предметів у слотах радіальної панелі.",
   "config.radialhotbar.option.hideEmptySlots": "Приховувати порожні слоти",
@@ -21,5 +23,7 @@
   "config.radialhotbar.option.autoEquipArmor": "Автоматично одягати броню",
   "config.radialhotbar.option.autoEquipArmor.tooltip": "Автоматично одягає броню, коли її вибрано в радіальному меню.",
   "config.radialhotbar.option.swapToRecentOnNoSelect": "Перемикатися на попередньо використаний слот (Якщо без вибору)",
-  "config.radialhotbar.option.swapToRecentOnNoSelect.tooltip": "Якщо в радіальному меню не вибрано жодного слота, відбувається перемикання між поточним і попередньо використаним слотами."
+  "config.radialhotbar.option.swapToRecentOnNoSelect.tooltip": "Якщо в радіальному меню не вибрано жодного слота, відбувається перемикання між поточним і попередньо використаним слотами.",
+  "config.radialhotbar.option.previousItemInCenterOnNoSelect": "Відобразити попередній предмет у центрі",
+  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "Якщо слот не обрано, радіальне меню показує останній використаний предмет у центрі."
 }

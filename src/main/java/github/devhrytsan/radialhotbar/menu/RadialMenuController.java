@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import github.devhrytsan.radialhotbar.RadialHotBarMod;
 
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
+import github.devhrytsan.radialhotbar.config.RadialHotBarConfig;
 import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
 import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 import net.minecraft.client.Minecraft;
@@ -33,6 +34,18 @@ public class RadialMenuController {
 				boolean radialMenuKeyDown = KeyInputUtils.isHardwareKeyPressed(RadialHotBarMod.OPEN_RADIAL_MENU_KEY, clientWindow);
 
 				if (radialMenuKeyDown != lastRadialMenuState) {
+				if(FileConfigHandler.CONFIG_INSTANCE.toggleMode) {
+					if (radialMenuKeyDown) {
+						if (RadialMenuScreen.INSTANCE.active) {
+							RadialMenuScreen.INSTANCE.deactivate(0,0);
+						} else {
+							if (client.screen == null || client.screen instanceof RadialMenuScreen) {
+								RadialMenuScreen.INSTANCE.activate();
+							}
+						}
+					}
+				}
+				else{
 					if (radialMenuKeyDown != RadialMenuScreen.INSTANCE.active) {
 
 						if (radialMenuKeyDown) {
@@ -40,8 +53,6 @@ public class RadialMenuController {
 								RadialMenuScreen.INSTANCE.activate();
 							}
 						} else {
-							var window = client.getWindow();
-
 							double scaledMouseX = ClientPlayerUtils.getScaledMouseX(client);
 							double scaledMouseY = ClientPlayerUtils.getScaledMouseY(client);
 
@@ -50,7 +61,10 @@ public class RadialMenuController {
 						}
 					}
 				}
-				lastRadialMenuState = radialMenuKeyDown;
+			}
+
+			lastRadialMenuState = radialMenuKeyDown;
+
 		} else {
 			if (RadialMenuScreen.INSTANCE.active) RadialMenuScreen.INSTANCE.deactivate(0, 0);
 		}

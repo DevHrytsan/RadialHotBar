@@ -12,7 +12,7 @@ import github.devhrytsan.radialhotbar.utils.MenuUtils;
 import net.minecraft.core.component.DataComponents;
 //? }
 
-//? if <1.21.1 {
+//? if <1.21.5 {
 
 /*import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -57,6 +57,8 @@ public class RadialMenuScreen extends Screen {
 	private int initialSlot = 0;
 	private boolean itemSelected = false;
 
+	private boolean wasLeftMousePressed = false;
+
 	private final Minecraft client = Minecraft.getInstance();
 
 	// Maybe should move it to some Service Locator rather than Singleton.
@@ -78,6 +80,10 @@ public class RadialMenuScreen extends Screen {
 	@Override
 	public void tick() {
 		super.tick();
+
+	 if(FileConfigHandler.CONFIG_INSTANCE.toggleMode){
+		 handleMouseClick();
+	 }
 	}
 
 	@Override
@@ -143,25 +149,7 @@ public class RadialMenuScreen extends Screen {
 		if (client != null && client.player != null) {
 
 			if (FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect) {
-
-				int centerX = client.getWindow().getGuiScaledWidth() / 2;
-				int centerY = client.getWindow().getGuiScaledHeight() / 2;
-				double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
-
-				float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
-				float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
-
-				boolean isInsideMinRadius = MathUtils.betweenTwoValues(distanceFromCenter, 0, minRadiusIgnore);
-
-				if (!itemSelected && isInsideMinRadius) {
-					int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
-
-					int target = lastUsedSlot;
-					lastUsedSlot = currentSlot;
-					initialSlot = target;
-
-					handleInteraction(target);
-				}
+				handleSwapToRecent(mouseX, mouseY);
 			}
 		}
 		if (client.screen == INSTANCE) {
@@ -198,8 +186,7 @@ public class RadialMenuScreen extends Screen {
 
 			double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
-			boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ?
-					MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+			boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
 			if (mouseIn) {
 				this.itemSelected = true;
@@ -300,8 +287,7 @@ public class RadialMenuScreen extends Screen {
 
 			double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
-			mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ?
-					MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+			mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
 			float scale = mouseIn ? BASE_ITEM_SCALE_FACTOR * SELECTED_ITEM_SCALE_FACTOR : BASE_ITEM_SCALE_FACTOR * NOT_SELECTED_ITEM_SCALE_FACTOR;
 
@@ -325,7 +311,22 @@ public class RadialMenuScreen extends Screen {
 
 			//Render selected preview
 			if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
-				renderCenterItem(context, selectedStack);
+				if (FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect && FileConfigHandler.CONFIG_INSTANCE.usePreviewPreviousItemOnNoSelect) {
+					boolean isInsideMinRadius = MathUtils.betweenTwoValues(distanceFromCenter, 0, minRadiusIgnore);
+
+					if (!itemSelected && isInsideMinRadius) {
+						int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
+
+						ItemStack lastUsedStack = inventory.getItem(lastUsedSlot);
+						renderCenterItem(context, lastUsedStack);
+
+					} else {
+						renderCenterItem(context, selectedStack);
+					}
+				} else {
+					renderCenterItem(context, selectedStack);
+				}
+
 			}
 		}
 
@@ -346,30 +347,27 @@ public class RadialMenuScreen extends Screen {
 			int centerX = client.getWindow().getGuiScaledWidth() / 2;
 			int centerY = client.getWindow().getGuiScaledHeight() / 2;
 
-			GuiGraphicsUtils.PushMatrix(context);
+			boolean isEmpty = itemStack.isEmpty();
 
-			GuiGraphicsUtils.TranslateMatrix(context, centerX, centerY, 0);
+			if(!isEmpty) {
+				GuiGraphicsUtils.PushMatrix(context);
 
-			GuiGraphicsUtils.ScaleMatrix(context, centerScale, centerScale, 1);
+				GuiGraphicsUtils.TranslateMatrix(context, centerX, centerY, 0);
 
-			GuiGraphicsUtils.TranslateMatrix(context, -8, -8, 0);
+				GuiGraphicsUtils.ScaleMatrix(context, centerScale, centerScale, 1);
 
-			GuiGraphicsUtils.RenderItem(context, itemStack, 0, 0);
-			GuiGraphicsUtils.RenderItemDecoration(context, textRenderer, itemStack, 0, 0);
+				GuiGraphicsUtils.TranslateMatrix(context, -8, -8, 0);
 
-			GuiGraphicsUtils.PopMatrix(context);
+				GuiGraphicsUtils.RenderItem(context, itemStack, 0, 0);
+				GuiGraphicsUtils.RenderItemDecoration(context, textRenderer, itemStack, 0, 0);
 
-			String itemName = itemStack.getHoverName().getString();
-			int textWidth = textRenderer.width(itemName);
+				GuiGraphicsUtils.PopMatrix(context);
 
-			GuiGraphicsUtils.DrawString(context,
-					textRenderer,
-					itemName,
-					centerX - (textWidth / 2),
-					centerY + (int) halfItemSize + 5,
-					0xFFFFFFFF,
-					true
-			);
+				String itemName = itemStack.getHoverName().getString();
+				int textWidth = textRenderer.width(itemName);
+
+				GuiGraphicsUtils.DrawString(context, textRenderer, itemName, centerX - (textWidth / 2), centerY + (int) halfItemSize + 5, 0xFFFFFFFF, true);
+			}
 		}
 	}
 
@@ -379,6 +377,27 @@ public class RadialMenuScreen extends Screen {
 
 		if (client.getConnection() != null) {
 			client.getConnection().send(new ServerboundSetCarriedItemPacket(sourceSlot));
+		}
+	}
+
+	private void handleSwapToRecent(double mouseX, double mouseY) {
+		int centerX = client.getWindow().getGuiScaledWidth() / 2;
+		int centerY = client.getWindow().getGuiScaledHeight() / 2;
+		double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+
+		float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
+		float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
+
+		boolean isInsideMinRadius = MathUtils.betweenTwoValues(distanceFromCenter, 0, minRadiusIgnore);
+
+		if (!itemSelected && isInsideMinRadius) {
+			int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
+
+			int target = lastUsedSlot;
+			lastUsedSlot = currentSlot;
+			initialSlot = target;
+
+			handleInteraction(target);
 		}
 	}
 
@@ -446,5 +465,26 @@ public class RadialMenuScreen extends Screen {
 
 			ClientPlayerUtils.handleMouseClickSwap(client, currentSlot, sourceSlot);
 		}
+	}
+
+	private void handleMouseClick() {
+		var clientWindow = client.getWindow();
+
+		var keyAttack = Minecraft.getInstance().options.keyAttack;
+		boolean isLeftMousePressed = KeyInputUtils.isHardwareKeyPressed(keyAttack, clientWindow);
+
+		// This is not the best approach.
+        // It could be done using Screen events (like mousePressed, etc.),
+        // but due to differences between versions, it becomes a backward compatibility nightmare in code.
+
+		if (isLeftMousePressed && !wasLeftMousePressed) {
+			double scaledMouseX = ClientPlayerUtils.getScaledMouseX(client);
+			double scaledMouseY = ClientPlayerUtils.getScaledMouseY(client);
+
+			RadialMenuScreen.INSTANCE.selectItem(scaledMouseX, scaledMouseY, 0);
+			RadialMenuScreen.INSTANCE.deactivate(scaledMouseX, scaledMouseY);
+		}
+
+		wasLeftMousePressed = isLeftMousePressed;
 	}
 }
