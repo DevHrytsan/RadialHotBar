@@ -12,7 +12,7 @@ platform {
 		required("forge") {
 			forgeVersionRange = "[1,)"
 		}
-		required(modid = "cloth-config") {
+		required(modid = "cloth_config") {
 			slug("cloth-config")
 			versionRange = ">=${prop("deps.cloth-config")}"
 		}

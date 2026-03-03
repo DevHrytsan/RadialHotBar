@@ -8,6 +8,8 @@
   "config.radialhotbar.option.enabled.tooltip": "Enables or disables mod.",
   "config.radialhotbar.option.scaleFactor": "Scale Factor",
   "config.radialhotbar.option.scaleFactor.tooltip": "Controls how big the radial hot bar appears on screen.",
+  "config.radialhotbar.option.toggleMode": "Enable Toggle Mode",
+  "config.radialhotbar.option.toggleMode.tooltip": "The radial menu stays open after pressing the key and closes when pressed again. Left mouse button (LMB) is used for selection.",
   "config.radialhotbar.option.shownames": "Show Item Names",
   "config.radialhotbar.option.shownames.tooltip": "Shows item name in radial hot bar slots.",
   "config.radialhotbar.option.hideEmptySlots": "Hide Empty Slots",
@@ -21,5 +23,7 @@
   "config.radialhotbar.option.autoEquipArmor": "Auto Equip Armor",
   "config.radialhotbar.option.autoEquipArmor.tooltip": "Automatically equips armor when it is selected from the radial menu.",
   "config.radialhotbar.option.swapToRecentOnNoSelect": "Swap to Previously Used Slot (If No Selection)",
-  "config.radialhotbar.option.swapToRecentOnNoSelect.tooltip": "If no slot is selected in the radial menu, the radial menu swaps between the current and previously used slots."
+  "config.radialhotbar.option.swapToRecentOnNoSelect.tooltip": "If no slot is selected in the radial menu, the radial menu swaps between the current and previously used slots.",
+  "config.radialhotbar.option.previousItemInCenterOnNoSelect": "Preview Previously Used Item in Center",
+  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "If no slot is selected, the radial menu shows the last used item in the center."
 }

@@ -20,13 +20,13 @@ public class RadialHotBarConfigScreen {
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.enabled"), FileConfigHandler.CONFIG_INSTANCE.modEnabled)
+        var modEnableToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.enabled"), FileConfigHandler.CONFIG_INSTANCE.modEnabled)
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.radialhotbar.option.enabled.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.modEnabled = newValue)
-                .build());
+                .build();
 
-        general.addEntry(entryBuilder.startIntSlider(
+        var scaleFactorSlider = entryBuilder.startIntSlider(
 						Component.translatable("config.radialhotbar.option.scaleFactor"),
                         FileConfigHandler.CONFIG_INSTANCE.scaleFactor,
                         Constants.MIN_SCALE_FACTOR,
@@ -34,7 +34,13 @@ public class RadialHotBarConfigScreen {
                 ).setDefaultValue(Constants.DEFAULT_SCALE_FACTOR)
                 .setTooltip(Component.translatable("config.radialhotbar.option.scaleFactor.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.scaleFactor = newValue) // Save action
-                .build());
+                .build();
+
+		var toggleBooleanToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.toggleMode"), FileConfigHandler.CONFIG_INSTANCE.toggleMode)
+				.setDefaultValue(false)
+				.setTooltip(Component.translatable("config.radialhotbar.option.toggleMode.tooltip"))
+				.setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.toggleMode = newValue)
+				.build();
 
         //general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.shownames"), FileConfigHandler.CONFIG_INSTANCE.showItemNames)
             //    .setDefaultValue(true)
@@ -42,41 +48,59 @@ public class RadialHotBarConfigScreen {
               //  .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.showItemNames = newValue)
               //  .build());
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.hideEmptySlots"), FileConfigHandler.CONFIG_INSTANCE.hideEmptySlots)
+        var hideEmptySlotToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.hideEmptySlots"), FileConfigHandler.CONFIG_INSTANCE.hideEmptySlots)
                 .setDefaultValue(false)
                 .setTooltip(Component.translatable("config.radialhotbar.option.hideEmptySlots.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.hideEmptySlots = newValue)
-                .build());
+                .build();
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.useCenterItemPreview"), FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview)
+        var useCenterPreviewToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.useCenterItemPreview"), FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview)
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.radialhotbar.option.useCenterItemPreview.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview = newValue)
-                .build());
+                .build();
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.allowMovementWhileOpen"), FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen)
+        var allowMovementToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.allowMovementWhileOpen"), FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen)
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.radialhotbar.option.allowMovementWhileOpen.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen = newValue)
-                .build());
+                .build();
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.autoSort"), FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots)
+        var autoSortToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.autoSort"), FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots)
                 .setDefaultValue(false)
                 .setTooltip(Component.translatable("config.radialhotbar.option.autoSort.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useAutoSortSlots = newValue)
-                .build());
+                .build();
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.autoEquipArmor"), FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor)
+       var autoEquipArmor = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.autoEquipArmor"), FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor)
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.radialhotbar.option.autoEquipArmor.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor = newValue)
-                .build());
+                .build();
 
-		general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.swapToRecentOnNoSelect"), FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect)
+		var swapToRecentNoSelectToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.swapToRecentOnNoSelect"), FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect)
 				.setDefaultValue(false)
 				.setTooltip(Component.translatable("config.radialhotbar.option.swapToRecentOnNoSelect.tooltip"))
 				.setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect = newValue)
-				.build());
+				.build();
+
+		var showPreviousItemOnCenterToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.previousItemInCenterOnNoSelect"), FileConfigHandler.CONFIG_INSTANCE.usePreviewPreviousItemOnNoSelect)
+				.setDefaultValue(false)
+				.setTooltip(Component.translatable("config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip"))
+				.setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.usePreviewPreviousItemOnNoSelect = newValue)
+				.setRequirement(() -> swapToRecentNoSelectToggle.getValue() == true && useCenterPreviewToggle.getValue() == true)
+				.build();
+
+		general.addEntry(modEnableToggle);
+		general.addEntry(scaleFactorSlider);
+		general.addEntry(toggleBooleanToggle);
+		general.addEntry(hideEmptySlotToggle);
+		general.addEntry(useCenterPreviewToggle);
+		general.addEntry(allowMovementToggle);
+		general.addEntry(autoSortToggle);
+		general.addEntry(autoEquipArmor);
+		general.addEntry(swapToRecentNoSelectToggle);
+		general.addEntry(showPreviousItemOnCenterToggle);
 
         return builder.build();
     }

@@ -11,9 +11,9 @@ public class ClientPlayerUtils {
 		//? if >=1.21.5 {
 		return clientWindow.handle();
 		//? } else {
-		
+
 		/*return clientWindow.getWindow();
-		
+
 		*///? }
 	}
 
@@ -63,11 +63,10 @@ public class ClientPlayerUtils {
 	}
 
 	public static double getScaledMouseX(Minecraft client) {
-		return (double) (client.mouseHandler.xpos() / client.getWindow().getGuiScale());
-	}
+		return client.mouseHandler.xpos() * (double) client.getWindow().getGuiScaledWidth() / (double) client.getWindow().getScreenWidth();	}
 
 	public static double getScaledMouseY(Minecraft client) {
-		return (double) (client.mouseHandler.ypos() / client.getWindow().getGuiScale());
+		return client.mouseHandler.ypos() * (double) client.getWindow().getGuiScaledHeight() / (double) client.getWindow().getScreenHeight();
 	}
 
 }
