@@ -245,9 +245,9 @@ public class RadialMenuScreen extends Screen {
 
 			/*int color = 0x80000000;
 
-			GuiGraphicsUtils.PushMatrix(context);
+			GuiGraphicsUtils.pushMatrix(context);
 	        context.fill(0, 0, width, height, color);
-			GuiGraphicsUtils.PopMatrix(context);
+			GuiGraphicsUtils.popMatrix(context);
 
 		*///? }
 	}

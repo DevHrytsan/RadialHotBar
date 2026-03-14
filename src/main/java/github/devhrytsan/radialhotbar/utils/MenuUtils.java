@@ -1,5 +1,7 @@
 package github.devhrytsan.radialhotbar.utils;
 
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -8,8 +10,6 @@ import net.minecraft.world.item.*;
 
 //? if >=1.20.5 {
 import net.minecraft.core.component.DataComponents;
-
-import java.util.List;
 //? }
 
 public class MenuUtils {
