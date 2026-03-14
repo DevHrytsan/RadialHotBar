@@ -143,7 +143,7 @@ public class RadialMenuScreen extends Screen {
 		}
 	}
 
-	public void deactivate(double mouseX, double mouseY) {
+	public void deactivate(int mouseX, int mouseY) {
 		active = false;
 
 		if (client != null && client.player != null) {
@@ -157,7 +157,15 @@ public class RadialMenuScreen extends Screen {
 		}
 	}
 
-	public void selectItem(double mouseX, double mouseY, int button) {
+	public void selectAndDeactivate(){
+		int scaledMouseX = (int)ClientPlayerUtils.getScaledMouseX(client);
+		int scaledMouseY = (int)ClientPlayerUtils.getScaledMouseY(client);
+
+		selectItem(scaledMouseX, scaledMouseY, 0);
+		deactivate(scaledMouseX, scaledMouseY);
+	}
+
+	public void selectItem(int mouseX, int mouseY, int button) {
 		if (client == null || client.player == null) return;
 
 		int centerX = client.getWindow().getGuiScaledWidth() / 2;
@@ -171,20 +179,20 @@ public class RadialMenuScreen extends Screen {
 			return;
 		}
 
-		double anglePerItem = 360.0 / totalItemsToDraw;
-		double halfAnglePerItem = anglePerItem * 0.5;
+		float anglePerItem = 360.0f / totalItemsToDraw;
+		float halfAnglePerItem = anglePerItem * 0.5f;
 
 		for (int i = 0; i < totalItemsToDraw; i++) {
 
-			double angleDeg = anglePerItem * i - 90.0;
+			float angleDeg = anglePerItem * i - 90.0f;
 
 			int realSlotIndex = slotsToDraw.get(i);
 
-			double checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
-			double checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
-			double adjustedMouseAngle = MathUtils.RelativeAngle(centerX, centerY, mouseX, mouseY);
+			float checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
+			float checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
+			float adjustedMouseAngle = MathUtils.relativeAngle(centerX, centerY, mouseX, mouseY);
 
-			double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+			float distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
 			boolean mouseIn = (MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore)) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
@@ -258,8 +266,8 @@ public class RadialMenuScreen extends Screen {
 		float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
 		float maxRadiusIgnore = radius * MAX_RADIUS_IGNORE_MOUSE_FACTOR;
 
-		double anglePerItem = 360.0 / totalItemsToDraw;
-		double halfAnglePerItem = anglePerItem * 0.5;
+		float anglePerItem = 360.0f / totalItemsToDraw;
+		float halfAnglePerItem = anglePerItem * 0.5f;
 
 		ItemStack selectedStack = ItemStack.EMPTY; //Maybe I should do with ID
 
@@ -268,7 +276,7 @@ public class RadialMenuScreen extends Screen {
 			//double angleRad = (2 * Math.PI / totalItemsToDraw) * i - (Math.PI / 2);// Radians
 			//double angleDeg = anglePerItem * i - 90.0; // Degrees
 
-			double angleDeg = anglePerItem * i - 90.0;
+			float angleDeg = anglePerItem * i - 90.0f;
 			double angleRad = Math.toRadians(angleDeg);
 
 			int realSlotIndex = slotsToDraw.get(i);
@@ -279,13 +287,13 @@ public class RadialMenuScreen extends Screen {
 			int renderX = x - 8;
 			int renderY = y - 8;
 
-			double checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
-			double checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
+			float checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
+			float checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
 			boolean mouseIn;
 
-			double adjustedMouseAngle = MathUtils.RelativeAngle(centerX, centerY, mouseX, mouseY);
+			float adjustedMouseAngle = MathUtils.relativeAngle(centerX, centerY, mouseX, mouseY);
 
-			double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+			float distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
 			mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
@@ -418,10 +426,10 @@ public class RadialMenuScreen extends Screen {
 		}
 	}
 
-	private void handleSwapToRecent(double mouseX, double mouseY) {
+	private void handleSwapToRecent(int mouseX, int mouseY) {
 		int centerX = client.getWindow().getGuiScaledWidth() / 2;
 		int centerY = client.getWindow().getGuiScaledHeight() / 2;
-		double distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+		float distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
 
 		float radius = GLOBAL_UI_SCALE_FACTOR * FileConfigHandler.CONFIG_INSTANCE.scaleFactor * BASE_ITEM_RADIUS;
 		float minRadiusIgnore = radius * MIN_RADIUS_IGNORE_MOUSE_FACTOR;
@@ -516,11 +524,7 @@ public class RadialMenuScreen extends Screen {
         // but due to differences between versions, it becomes a backward compatibility nightmare in code.
 
 		if (isLeftMousePressed && !wasLeftMousePressed) {
-			double scaledMouseX = ClientPlayerUtils.getScaledMouseX(client);
-			double scaledMouseY = ClientPlayerUtils.getScaledMouseY(client);
-
-			RadialMenuScreen.INSTANCE.selectItem(scaledMouseX, scaledMouseY, 0);
-			RadialMenuScreen.INSTANCE.deactivate(scaledMouseX, scaledMouseY);
+			selectAndDeactivate();
 		}
 
 		wasLeftMousePressed = isLeftMousePressed;
