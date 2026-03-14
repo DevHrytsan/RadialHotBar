@@ -62,11 +62,11 @@ public class ClientPlayerUtils {
 		);
 	}
 
-	public static double getScaledMouseX(Minecraft client) {
-		return client.mouseHandler.xpos() * (double) client.getWindow().getGuiScaledWidth() / (double) client.getWindow().getScreenWidth();	}
+	public static float getScaledMouseX(Minecraft client) {
+		return (float)client.mouseHandler.xpos() * (float) client.getWindow().getGuiScaledWidth() / (float) client.getWindow().getScreenWidth();	}
 
-	public static double getScaledMouseY(Minecraft client) {
-		return client.mouseHandler.ypos() * (double) client.getWindow().getGuiScaledHeight() / (double) client.getWindow().getScreenHeight();
+	public static float getScaledMouseY(Minecraft client) {
+		return (float)client.mouseHandler.ypos() * (float) client.getWindow().getGuiScaledHeight() / (float) client.getWindow().getScreenHeight();
 	}
 
 }

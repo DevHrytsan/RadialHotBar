@@ -59,7 +59,12 @@ public class RadialHotBarConfigScreen {
                 .setTooltip(Component.translatable("config.radialhotbar.option.useCenterItemPreview.tooltip"))
                 .setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview = newValue)
                 .build();
-
+		var useCenterPreviewDescriptionToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.useCenterPreviewDescription"), FileConfigHandler.CONFIG_INSTANCE.useCenterPreviewDescription)
+				.setDefaultValue(true)
+				.setTooltip(Component.translatable("config.radialhotbar.option.useCenterPreviewDescription.tooltip"))
+				.setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useCenterPreviewDescription = newValue)
+				.setRequirement(() -> useCenterPreviewToggle.getValue() == true)
+				.build();
         var allowMovementToggle = entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.allowMovementWhileOpen"), FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen)
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.radialhotbar.option.allowMovementWhileOpen.tooltip"))
@@ -96,6 +101,7 @@ public class RadialHotBarConfigScreen {
 		general.addEntry(toggleBooleanToggle);
 		general.addEntry(hideEmptySlotToggle);
 		general.addEntry(useCenterPreviewToggle);
+		general.addEntry(useCenterPreviewDescriptionToggle);
 		general.addEntry(allowMovementToggle);
 		general.addEntry(autoSortToggle);
 		general.addEntry(autoEquipArmor);
