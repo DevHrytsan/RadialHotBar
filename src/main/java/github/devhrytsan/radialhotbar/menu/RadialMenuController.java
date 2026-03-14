@@ -53,11 +53,7 @@ public class RadialMenuController {
 								RadialMenuScreen.INSTANCE.activate();
 							}
 						} else {
-							double scaledMouseX = ClientPlayerUtils.getScaledMouseX(client);
-							double scaledMouseY = ClientPlayerUtils.getScaledMouseY(client);
-
-							RadialMenuScreen.INSTANCE.selectItem(scaledMouseX, scaledMouseY, 0);
-							RadialMenuScreen.INSTANCE.deactivate(scaledMouseX, scaledMouseY);
+							RadialMenuScreen.INSTANCE.selectAndDeactivate();
 						}
 					}
 				}

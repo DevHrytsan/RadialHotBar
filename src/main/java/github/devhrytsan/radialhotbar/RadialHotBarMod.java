@@ -48,7 +48,7 @@ public class RadialHotBarMod {
 
 	// General
 	public static final String MOD_ID = /*$ mod_id*/ "radialhotbar";
-	public static final String MOD_VERSION = /*$ mod_version*/ "0.4.0";
+	public static final String MOD_VERSION = /*$ mod_version*/ "0.5.0";
 	public static final String MOD_FRIENDLY_NAME = /*$ mod_name*/ "Radial Hot Bar";
 	public static final Logger MAIN_LOGGER = LoggerFactory.getLogger(MOD_ID);
 	// Keys
