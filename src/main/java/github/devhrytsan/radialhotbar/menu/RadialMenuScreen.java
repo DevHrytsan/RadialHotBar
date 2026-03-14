@@ -335,7 +335,7 @@ public class RadialMenuScreen extends Screen {
 	private void renderCenterItem(GuiGraphics context, ItemStack itemStack) {
 		if (itemStack.isEmpty()) return;
 
-		boolean showDescription = true;
+		boolean showDescription = FileConfigHandler.CONFIG_INSTANCE.useCenterPreviewDescription;
 
 		var clientWindow = client.getWindow();
 		Player player = this.client.player;

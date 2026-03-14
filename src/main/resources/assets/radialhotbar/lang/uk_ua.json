@@ -16,6 +16,8 @@
   "config.radialhotbar.option.hideEmptySlots.tooltip": "Якщо увімкнено, порожні слоти панелі не будуть відображатися в радіальному меню.",
   "config.radialhotbar.option.useCenterItemPreview": "Показувати перегляд предмета в центрі",
   "config.radialhotbar.option.useCenterItemPreview.tooltip": "Увімкнути попередній перегляд предмета в центрі радіального меню.",
+  "config.radialhotbar.option.useCenterPreviewDescription": "Показувати опис предмета в центрі",
+  "config.radialhotbar.option.useCenterPreviewDescription.tooltip": "Показує опис вибраного предмета в центрі радіального меню.",
   "config.radialhotbar.option.allowMovementWhileOpen": "Дозволити рух",
   "config.radialhotbar.option.allowMovementWhileOpen.tooltip": "Дозволяє гравцю рухатися, коли радіальне меню відкрите.",
   "config.radialhotbar.option.autoSort": "Автоматичне сортування",

@@ -16,6 +16,8 @@
   "config.radialhotbar.option.hideEmptySlots.tooltip": "If true, empty slots on hot bar will not appear in the radial menu.",
   "config.radialhotbar.option.useCenterItemPreview": "Show a item preview in the center",
   "config.radialhotbar.option.useCenterItemPreview.tooltip": "Enables the item preview shown in the center of the radial menu.",
+  "config.radialhotbar.option.useCenterPreviewDescription": "Show Item Description In The Center",
+  "config.radialhotbar.option.useCenterPreviewDescription.tooltip": "Shows the selected item's description in the center of the radial menu.",
   "config.radialhotbar.option.allowMovementWhileOpen": "Allow movement",
   "config.radialhotbar.option.allowMovementWhileOpen.tooltip": "Allows the player to move while the radial menu is open.",
   "config.radialhotbar.option.autoSort": "Auto Sort",
