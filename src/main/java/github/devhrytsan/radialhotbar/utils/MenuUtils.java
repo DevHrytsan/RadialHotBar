@@ -1,11 +1,15 @@
 package github.devhrytsan.radialhotbar.utils;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.*;
 
 //? if >=1.20.5 {
 import net.minecraft.core.component.DataComponents;
+
+import java.util.List;
 //? }
 
 public class MenuUtils {
@@ -113,6 +117,18 @@ public class MenuUtils {
 			default -> armorSlotId = -1;
 		}
 		return armorSlotId;
+	}
+
+	public static List<Component> getTooltipLines(ItemStack itemStack, Minecraft client){
+		var player = client.player;
+
+		//? if >=1.20.5 {
+		return itemStack.getTooltipLines(Item.TooltipContext.of(client.level), player, TooltipFlag.NORMAL);
+		//? } else {
+		/*
+        return itemStack.getTooltipLines(player, TooltipFlag.Default.NORMAL);
+        */
+		//? }
 	}
 
 }
