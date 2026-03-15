@@ -15,6 +15,7 @@ platform {
 		required(modid = "cloth_config") {
 			slug("cloth-config")
 			versionRange = ">=${prop("deps.cloth-config")}"
+			forgeVersionRange = "[${prop("deps.cloth_config")},)"
 		}
 	}
 }
