@@ -10,9 +10,4 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftServer.class)
 @MixinEnvironment(type = MixinEnvironment.Env.CLIENT)
 public class ExampleClientMixin {
-
-	@Inject(method = "loadLevel", at = @At("RETURN"))
-	private void afterLoadLevel(CallbackInfo ci) {
-
-	}
 }
