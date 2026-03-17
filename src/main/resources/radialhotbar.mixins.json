@@ -1,13 +1,11 @@
 {
   "package": "github.devhrytsan.radialhotbar.mixin",
-  "required": true,
+  "required": false,
   "minVersion": "0.8",
   "compatibilityLevel": "${java}",
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [],
-  "client": [
-    "client.ExampleClientMixin"
-  ]
+  "client": []
 }

@@ -6,6 +6,9 @@ import net.minecraft.client.Minecraft;
 
 //? neoforge {
 /*import net.neoforged.neoforge.client.settings.KeyConflictContext;
+*///?} forge {
+/*import net.minecraftforge.client.settings.IKeyConflictContext;
+import net.minecraftforge.client.settings.KeyConflictContext;
 *///?}
 
 public class RadialMenuMovementController {
@@ -40,6 +43,18 @@ public class RadialMenuMovementController {
 		if (this.client == null || this.client.player == null) return;
 
 		KeyConflictContext context = allowInScreen
+				? KeyConflictContext.UNIVERSAL
+				: KeyConflictContext.IN_GAME;
+
+		for (KeyMapping key : keysToKeep) {
+			key.setKeyConflictContext(context);
+		}
+	}
+    *///?} forge {
+	/*public void updateMovementKeyContextNeoForge(boolean allowInScreen) {
+		if (this.client == null || this.client.player == null) return;
+
+		IKeyConflictContext context = allowInScreen
 				? KeyConflictContext.UNIVERSAL
 				: KeyConflictContext.IN_GAME;
 

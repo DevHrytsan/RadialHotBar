@@ -151,6 +151,14 @@ public class RadialHotBarMod {
 		MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent event) -> {
 			if (event.phase == TickEvent.Phase.END) {
 				RadialMenuController.INSTANCE.HandleUpdate(clientI);
+
+				if (clientI.screen instanceof RadialMenuScreen) {
+				if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
+					boolean isMenuActive = RadialMenuScreen.INSTANCE.active;
+					RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
+					RadialMenuMovementController.INSTANCE.handleMovement();
+				}
+			}
 			}
 		});
 

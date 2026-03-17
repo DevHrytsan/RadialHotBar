@@ -14,7 +14,7 @@ platform {
 		}
 		required(modid = "cloth_config") {
 			slug("cloth-config")
-			versionRange = ">=${prop("deps.cloth-config")}"
+			forgeVersionRange = "[${prop("deps.cloth_config")},)"
 		}
 	}
 }
@@ -71,7 +71,7 @@ dependencies {
 	implementation(libs.moulberry.mixinconstraints)
 	jarJar(libs.moulberry.mixinconstraints)
 
-	implementation("me.shedaniel.cloth:cloth-config-forge:${prop("deps.cloth_config")}")
+	modImplementation("me.shedaniel.cloth:cloth-config-forge:${prop("deps.cloth_config")}")
 }
 
 sourceSets {
