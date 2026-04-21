@@ -43,11 +43,22 @@ public class KeyInputUtils {
 
 		if (code == -1) return false; // Skip unbound keys
 
+		boolean isBaseKeyDown = false;
+
 		if (boundKey.getType() == InputConstants.Type.MOUSE) {
 			long handle = ClientPlayerUtils.GetWindowHandle(window);
-			return GLFW.glfwGetMouseButton(handle, code) == GLFW.GLFW_PRESS;
+			isBaseKeyDown = GLFW.glfwGetMouseButton(handle, code) == GLFW.GLFW_PRESS;
 		} else {
-			return KeyInputUtils.isKeyDown(window, code);
+			isBaseKeyDown = KeyInputUtils.isKeyDown(window, code);
 		}
+
+		//? fabric {
+		return isBaseKeyDown;
+		//?} else {
+		/*
+		if (!isBaseKeyDown) return false;
+		return keyMapping.getKeyModifier().isActive(null);
+		*/
+		//?}
 	}
 }
