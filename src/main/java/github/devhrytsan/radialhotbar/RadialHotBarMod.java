@@ -10,7 +10,7 @@ import github.devhrytsan.radialhotbar.config.RadialHotBarConfigScreen;
 import github.devhrytsan.radialhotbar.platform.Platform;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.*;
 import net.minecraft.client.Minecraft;
 
 import org.lwjgl.glfw.GLFW;

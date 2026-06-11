@@ -3,7 +3,12 @@ package github.devhrytsan.radialhotbar.utils;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+
+//? if >= 26.1 {
+/*import net.minecraft.world.inventory.ContainerInput;
+*///? } else {
 import net.minecraft.world.inventory.ClickType;
+ //? }
 
 public class ClientPlayerUtils {
 
@@ -14,7 +19,7 @@ public class ClientPlayerUtils {
 
 		/*return clientWindow.getWindow();
 
-		*///? }
+		 *///? }
 	}
 
 	public static int getPlayerSelectedSlot(LocalPlayer player) {
@@ -41,6 +46,15 @@ public class ClientPlayerUtils {
 	public static void handleMouseClickPickup(Minecraft client, int slotId) {
 		if (client.gameMode == null || client.player == null) return;
 
+        //? if >= 26.1 {
+		/*client.gameMode.handleContainerInput(
+				client.player.inventoryMenu.containerId,
+				slotId,
+				0,
+				ContainerInput.PICKUP,
+				client.player
+		);
+        *///? } else {
 		client.gameMode.handleInventoryMouseClick(
 				client.player.inventoryMenu.containerId,
 				slotId,
@@ -48,11 +62,20 @@ public class ClientPlayerUtils {
 				ClickType.PICKUP,
 				client.player
 		);
+		 //? }
 	}
 
 	public static void handleMouseClickSwap(Minecraft client, int fromSlot, int toSlot) {
 		if (client.gameMode == null || client.player == null) return;
-
+		//? if >= 26.1 {
+		/*client.gameMode.handleContainerInput(
+				client.player.inventoryMenu.containerId,
+				toSlot,
+				fromSlot,
+				ContainerInput.SWAP,
+				client.player
+		);
+		*///? } else {
 		client.gameMode.handleInventoryMouseClick(
 				client.player.inventoryMenu.containerId,
 				toSlot,
@@ -60,13 +83,15 @@ public class ClientPlayerUtils {
 				ClickType.SWAP,
 				client.player
 		);
+		 //? }
 	}
 
 	public static float getScaledMouseX(Minecraft client) {
-		return (float)client.mouseHandler.xpos() * (float) client.getWindow().getGuiScaledWidth() / (float) client.getWindow().getScreenWidth();	}
+		return (float) client.mouseHandler.xpos() * (float) client.getWindow().getGuiScaledWidth() / (float) client.getWindow().getScreenWidth();
+	}
 
 	public static float getScaledMouseY(Minecraft client) {
-		return (float)client.mouseHandler.ypos() * (float) client.getWindow().getGuiScaledHeight() / (float) client.getWindow().getScreenHeight();
+		return (float) client.mouseHandler.ypos() * (float) client.getWindow().getGuiScaledHeight() / (float) client.getWindow().getScreenHeight();
 	}
 
 }

@@ -8,7 +8,6 @@ import github.devhrytsan.radialhotbar.config.RadialHotBarConfig;
 import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
 import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 
