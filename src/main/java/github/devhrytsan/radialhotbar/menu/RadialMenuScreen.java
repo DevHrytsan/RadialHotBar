@@ -68,11 +68,14 @@ public class RadialMenuScreen extends Screen {
 	// But for a project of that size, it’s not really necessary.
 	public static final RadialMenuScreen INSTANCE = new RadialMenuScreen();
 
+	private GuiGraphicsLayer guiContextLayer;
+
 	public boolean active = false;
 
 	public RadialMenuScreen() {
 		super(Component.translatable("main.radialhotbar.title"));
 		slotsToDraw = new ArrayList<>(MAX_SLOTS_COUNT);
+		guiContextLayer = new GuiGraphicsLayer();
 	}
 
 	@Override
@@ -94,16 +97,16 @@ public class RadialMenuScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 		super.extractRenderState(context, mouseX, mouseY, delta);
 
-		GuiGraphicsLayer guiСontextLayer = new GuiGraphicsLayer(context);
-		handleRender(guiСontextLayer, mouseX, mouseY, delta);
+		guiContextLayer.setContext(context);
+		handleRender(guiContextLayer, mouseX, mouseY, delta);
 	}
 	*///? } else {
 	@Override
 	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.render(context, mouseX, mouseY, delta);
 
-		GuiGraphicsLayer guiСontextLayer = new GuiGraphicsLayer(context);
-		handleRender(guiСontextLayer, mouseX, mouseY, delta);
+		guiContextLayer.setContext(context);
+		handleRender(guiContextLayer, mouseX, mouseY, delta);
 	}
 	//? }
 
