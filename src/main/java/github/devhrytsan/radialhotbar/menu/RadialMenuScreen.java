@@ -1,9 +1,8 @@
 package github.devhrytsan.radialhotbar.menu;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
-import github.devhrytsan.radialhotbar.utils.GuiGraphicsUtils;
+import github.devhrytsan.radialhotbar.compatibility.GuiGraphicsLayer;
 import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 import github.devhrytsan.radialhotbar.utils.MathUtils;
 import github.devhrytsan.radialhotbar.utils.MenuUtils;
@@ -19,9 +18,14 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 *///? }
 
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+
+//? if >= 26.1 {
+/*import net.minecraft.client.gui.GuiGraphicsExtractor;
+*///? } else {
 import net.minecraft.client.gui.GuiGraphics;
+//? }
+
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -29,7 +33,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -86,16 +89,31 @@ public class RadialMenuScreen extends Screen {
 	 }
 	}
 
+	//? if >= 26.1 {
+	/*@Override
+	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+		super.extractRenderState(context, mouseX, mouseY, delta);
+
+		GuiGraphicsLayer guiСontextLayer = new GuiGraphicsLayer(context);
+		handleRender(guiСontextLayer, mouseX, mouseY, delta);
+	}
+	*///? } else {
 	@Override
 	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.render(context, mouseX, mouseY, delta);
+
+		GuiGraphicsLayer guiСontextLayer = new GuiGraphicsLayer(context);
+		handleRender(guiСontextLayer, mouseX, mouseY, delta);
+	}
+	//? }
+
+	private void handleRender(GuiGraphicsLayer context,int mouseX, int mouseY, float delta){
 
 		//boolean isEnabled = FileConfigHandler.CONFIG_INSTANCE.modEnabled;
 		boolean hasScreen = client.screen != null;
 		boolean isPaused = !client.isPaused();
 
 		if (hasScreen && isPaused) {
-			super.render(context, mouseX, mouseY, delta);
 
 			prepareSlots(context, mouseX, mouseY, delta);
 			renderBackgrounds(context, mouseX, mouseY, delta);
@@ -207,7 +225,7 @@ public class RadialMenuScreen extends Screen {
 		}
 	}
 
-	private void prepareSlots(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	private void prepareSlots(GuiGraphicsLayer context, int mouseX, int mouseY, float delta) {
 		Player player = this.client.player;
 		Inventory inventory = player.getInventory();
 
@@ -239,20 +257,20 @@ public class RadialMenuScreen extends Screen {
 		totalItemsToDraw = slotsToDraw.size();
 	}
 
-	private void renderBackgrounds(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	private void renderBackgrounds(GuiGraphicsLayer context, int mouseX, int mouseY, float delta) {
 		//? if <1.21.1 {
 
 
 			/*int color = 0x80000000;
 
-			GuiGraphicsUtils.pushMatrix(context);
+			context.pushMatrix();
 	        context.fill(0, 0, width, height, color);
-			GuiGraphicsUtils.popMatrix(context);
+	        context.popMatrix();
 
 		*///? }
 	}
 
-	private void renderItems(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	private void renderItems(GuiGraphicsLayer context, int mouseX, int mouseY, float delta) {
 
 		var clientWindow = client.getWindow();
 		Player player = this.client.player;
@@ -305,17 +323,15 @@ public class RadialMenuScreen extends Screen {
 				selectedStack = stack;
 			}
 
-			GuiGraphicsUtils.pushMatrix(context);
+			context.pushMatrix();
+			context.translate(renderX + 8, renderY + 8, 0);
+			context.scaleMatrix(scale, scale, 1);
+			context.translate(-8, -8, 0);
 
-			GuiGraphicsUtils.translateMatrix(context, renderX + 8, renderY + 8, 0);
+			context.renderItem(stack, 0, 0);
+			context.renderItemDecoration(textRenderer, stack, 0, 0);
 
-			GuiGraphicsUtils.scaleMatrix(context, scale, scale, 1);
-			GuiGraphicsUtils.translateMatrix(context, -8, -8, 0);
-
-			GuiGraphicsUtils.renderItem(context, stack, 0, 0);
-			GuiGraphicsUtils.renderItemDecoration(context, textRenderer, stack, 0, 0);
-
-			GuiGraphicsUtils.popMatrix(context);
+            context.popMatrix();
 
 			//Render selected preview
 			if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
@@ -340,7 +356,7 @@ public class RadialMenuScreen extends Screen {
 
 	}
 
-	private void renderCenterItem(GuiGraphics context, ItemStack itemStack) {
+	private void renderCenterItem(GuiGraphicsLayer context, ItemStack itemStack) {
 		if (itemStack.isEmpty()) return;
 
 		boolean showDescription = FileConfigHandler.CONFIG_INSTANCE.useCenterPreviewDescription;
@@ -383,15 +399,15 @@ public class RadialMenuScreen extends Screen {
 		// Render the item
 		float itemCenterY = startY + halfItemSize;
 
-		GuiGraphicsUtils.pushMatrix(context);
-		GuiGraphicsUtils.translateMatrix(context, centerX, itemCenterY, 0);
-		GuiGraphicsUtils.scaleMatrix(context, centerScale, centerScale, 1);
-		GuiGraphicsUtils.translateMatrix(context, -8, -8, 0);
+		context.pushMatrix();
+		context.translate(centerX, itemCenterY,0);
+		context.scaleMatrix(centerScale,centerScale,1);
+		context.translate(-8,-8,0);
 
-		GuiGraphicsUtils.renderItem(context, itemStack, 0, 0);
-		GuiGraphicsUtils.renderItemDecoration(context, textRenderer, itemStack, 0, 0);
+		context.renderItem(itemStack, 0, 0);
+		context.renderItemDecoration(textRenderer, itemStack, 0, 0);
 
-		GuiGraphicsUtils.popMatrix(context);
+		context.popMatrix();
 
 		// Render name
 		String itemName = itemStack.getHoverName().getString();
@@ -400,7 +416,7 @@ public class RadialMenuScreen extends Screen {
 		// Cast to int  so the text rendering stays pixel perfect
 		int nameY = (int) (itemCenterY + halfItemSize + 5);
 
-		GuiGraphicsUtils.drawString(context, textRenderer, itemName, centerX - (textWidth / 2), nameY, 0xFFFFFFFF, true);
+		context.drawString(textRenderer, itemName, centerX - (textWidth / 2), nameY, 0xFFFFFFFF, true);
 
 		// Render Description
 		if (showDescription && descriptionLines > 0) {
@@ -410,7 +426,7 @@ public class RadialMenuScreen extends Screen {
 				Component line = tooltip.get(i);
 				int lineWidth = textRenderer.width(line);
 
-				GuiGraphicsUtils.drawString(context, textRenderer, line, centerX - (lineWidth / 2), currentDescriptionY, 0xFFFFFFFF, true);
+				context.drawString(textRenderer, line, centerX - (lineWidth / 2), currentDescriptionY, 0xFFFFFFFF, true);
 
 				currentDescriptionY += fontHeight + 2;
 			}

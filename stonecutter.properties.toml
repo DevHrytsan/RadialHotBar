@@ -1,0 +1,85 @@
+mod.id = "radialhotbar"
+mod.name = "Radial Hot Bar"
+mod.group = "github.devhrytsan"
+mod.version = "0.5.2"
+mod.channel_tag = ""
+mod.description = "A faster way to access your items on hot bar"
+mod.authors = ["DevHrytsan"]
+mod.contributors = ["neuromuser"]
+mod.inception_year = "2026"
+mod.license.name = "MIT"
+mod.license.url = "https://github.com/DevHrytsan/RadialHotBar/blob/main/LICENSE"
+mod.license.dist = "repo"
+mod.sources_url = "https://github.com/DevHrytsan/RadialHotBar"
+mod.homepage_url = "https://modrinth.com/mod/radialhotbar"
+mod.issues_url = "https://github.com/DevHrytsan/RadialHotBar/issues"
+mod.discord_url = ""
+[[mod.pom.developers]]
+id = "devhrytsan"
+name = "DevHrytsan"
+url = "https://github.com/DevHrytsan"
+
+[forge]
+
+[forge."1.20.1"]
+deps.minecraft="1.20.1"
+deps.forge="47.4.16"
+deps.cloth-config="11.1.136"
+
+[fabric]
+deps.fabric-loader = "0.19.2"
+
+[fabric."1.20.1"]
+deps.minecraft = "1.20.1"
+deps.fabric-api = "0.92.7+1.20.1"
+deps.modmenu = "7.2.2"
+deps.cloth-config = "11.1.136"
+
+[fabric."1.21.1"]
+deps.minecraft = "1.21.1"
+deps.fabric-api = "0.116.8+1.21.1"
+deps.modmenu = "11.0.3"
+deps.cloth-config = "15.0.140"
+
+[fabric."1.21.10"]
+deps.minecraft = "1.21.10"
+deps.fabric-api = "0.138.3+1.21.10"
+deps.modmenu = "16.0.0"
+deps.cloth-config = "20.0.149"
+
+[fabric."1.21.11"]
+deps.minecraft = "1.21.11"
+deps.fabric-api = "0.141.3+1.21.11"
+deps.modmenu = "17.0.0-beta.1"
+deps.cloth-config = "21.11.153"
+
+[fabric."26.1.2"]
+deps.minecraft = "26.1.2"
+deps.fabric-api = "0.151.0+26.1.2"
+deps.modmenu = "18.0.0-beta.1"
+deps.cloth-config = "26.1.154"
+publish.additionalVersions = ["26.1", "26.1.1"]
+
+
+[neoforge]
+
+[neoforge."1.21.1"]
+deps.minecraft = "1.21.1"
+deps.neoforge = "21.1.200"
+deps.cloth-config = "15.0.140"
+
+[neoforge."1.21.10"]
+deps.minecraft = "1.21.10"
+deps.neoforge = "21.10.64"
+deps.cloth-config = "20.0.149"
+
+[neoforge."1.21.11"]
+deps.minecraft = "1.21.11"
+deps.neoforge = "21.11.38-beta"
+deps.cloth-config = "21.11.153"
+
+[neoforge."26.1.2"]
+deps.minecraft = "26.1.2"
+deps.neoforge = "26.1.2.12-beta"
+deps.cloth-config = "26.1.154"
+publish.additionalVersions = ["26.1", "26.1.1"]

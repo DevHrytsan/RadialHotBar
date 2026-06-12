@@ -10,7 +10,7 @@ import github.devhrytsan.radialhotbar.config.RadialHotBarConfigScreen;
 import github.devhrytsan.radialhotbar.platform.Platform;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.*;
 import net.minecraft.client.Minecraft;
 
 import org.lwjgl.glfw.GLFW;
@@ -19,9 +19,8 @@ import org.slf4j.LoggerFactory;
 
 //? fabric {
 import github.devhrytsan.radialhotbar.platform.fabric.FabricPlatform;
-
+import github.devhrytsan.radialhotbar.compatibility.FabricKeyHelperBridge;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 
 //?} neoforge {
 /*import github.devhrytsan.radialhotbar.platform.neoforge.NeoforgePlatform;
@@ -48,7 +47,7 @@ public class RadialHotBarMod {
 
 	// General
 	public static final String MOD_ID = /*$ mod_id*/ "radialhotbar";
-	public static final String MOD_VERSION = /*$ mod_version*/ "0.5.0";
+	public static final String MOD_VERSION = /*$ mod_version*/ "0.5.2";
 	public static final String MOD_FRIENDLY_NAME = /*$ mod_name*/ "Radial Hot Bar";
 	public static final Logger MAIN_LOGGER = LoggerFactory.getLogger(MOD_ID);
 	// Keys
@@ -85,7 +84,7 @@ public class RadialHotBarMod {
 				KEYBIND_CATEGORY
 		);
 
-		KeyBindingHelper.registerKeyBinding(OPEN_RADIAL_MENU_KEY);
+		FabricKeyHelperBridge.register(OPEN_RADIAL_MENU_KEY);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			RadialMenuController.INSTANCE.HandleUpdate(client);

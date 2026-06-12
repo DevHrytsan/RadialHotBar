@@ -8,7 +8,6 @@ build/
 !**/src/test/**/build/
 
 run/
-#versions/datagen
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -50,4 +49,7 @@ bin/
 ### Jetbrains ###
 .idea/
 !.idea/icon.png
+!.idea/externalDependencies.xml
 !.idea/icon.svg
+!.idea/runConfigurations/Run_Active_Client.xml
+!.idea/runConfigurations/Run_Active_Server.xml
