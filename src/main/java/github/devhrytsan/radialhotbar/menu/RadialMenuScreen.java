@@ -1,9 +1,8 @@
 package github.devhrytsan.radialhotbar.menu;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
-import github.devhrytsan.radialhotbar.utils.GuiGraphicsLayer;
+import github.devhrytsan.radialhotbar.compatibility.GuiGraphicsLayer;
 import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 import github.devhrytsan.radialhotbar.utils.MathUtils;
 import github.devhrytsan.radialhotbar.utils.MenuUtils;
@@ -19,7 +18,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 *///? }
 
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 
 //? if >= 26.1 {
@@ -35,7 +33,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.ArrayList;

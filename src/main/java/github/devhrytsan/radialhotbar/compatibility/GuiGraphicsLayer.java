@@ -1,4 +1,4 @@
-package github.devhrytsan.radialhotbar.utils;
+package github.devhrytsan.radialhotbar.compatibility;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
