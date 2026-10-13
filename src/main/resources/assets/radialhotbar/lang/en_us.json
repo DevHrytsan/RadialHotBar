@@ -27,5 +27,8 @@
   "config.radialhotbar.option.swapToRecentOnNoSelect": "Swap to Previously Used Slot (If No Selection)",
   "config.radialhotbar.option.swapToRecentOnNoSelect.tooltip": "If no slot is selected in the radial menu, the radial menu swaps between the current and previously used slots.",
   "config.radialhotbar.option.previousItemInCenterOnNoSelect": "Preview Previously Used Item in Center",
-  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "If no slot is selected, the radial menu shows the last used item in the center."
+  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "If no slot is selected, the radial menu shows the last used item in the center.",
+  "config.radialhotbar.option.enabledSlots": "Enabled Slots",
+  "config.radialhotbar.option.enabledSlots.tooltip": "Choose which hot bar slots (1-9) appear in the radial menu.",
+  "config.radialhotbar.option.enabledSlots.slot": "Slot %s"
 }

@@ -235,6 +235,8 @@ public class RadialMenuScreen extends Screen {
 		slotsToDraw.clear();
 
 		for (int i = 0; i < MAX_SLOTS_COUNT; i++) {
+			if (!FileConfigHandler.CONFIG_INSTANCE.isSlotEnabled(i)) continue;
+
 			if (!FileConfigHandler.CONFIG_INSTANCE.hideEmptySlots || !inventory.getItem(i).isEmpty()) {
 				slotsToDraw.add(i);
 			}

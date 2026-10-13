@@ -27,5 +27,8 @@
   "config.radialhotbar.option.swapToRecentOnNoSelect": "Переключаться на ранее использованный слот (Если нет выбора)",
   "config.radialhotbar.option.swapToRecentOnNoSelect.tooltip": "Если в радиальном меню не выбран ни один слот, происходит переключение между текущим и ранее использованным слотами.",
   "config.radialhotbar.option.previousItemInCenterOnNoSelect": "Отобразить предыдущий предмет в центре",
-  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "Если слот не выбран, радиальное меню показывает последний использованный предмет в центре."
+  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "Если слот не выбран, радиальное меню показывает последний использованный предмет в центре.",
+  "config.radialhotbar.option.enabledSlots": "Включённые слоты",
+  "config.radialhotbar.option.enabledSlots.tooltip": "Выберите, какие слоты панели (1-9) отображаются в радиальном меню.",
+  "config.radialhotbar.option.enabledSlots.slot": "Слот %s"
 }
