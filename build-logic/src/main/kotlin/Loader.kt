@@ -112,7 +112,8 @@ sealed class Loader(val id: String) {
 						iconFile = "assets/icon.png", // NeoForge 26.2 +
 						authors = ctx.authors.joinToString(", "),
 						credits = "${ctx.authors.joinToString(", ")} Contributors: ${ctx.contributors.joinToString(", ")}",
-						description = ctx.description
+						description = ctx.description,
+						displayTest = if (ctx.environmentPhysicalServer) "MATCH_VERSION" else "IGNORE_ALL_VERSION"
 					)
 				),
 				dependencies = mapOf(ctx.modId to forgeDeps),

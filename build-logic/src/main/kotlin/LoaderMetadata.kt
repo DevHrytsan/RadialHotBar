@@ -49,7 +49,9 @@ data class ForgeMod(
 	val authors: String,
 	val logoBlur: Boolean = false,
 	val credits: String,
-	val description: String
+	val description: String,
+	// IGNORE_ALL_VERSION lets a client-only mod join servers without it. Forge 1.20.1 has no clientSideOnly
+	val displayTest: String
 )
 
 @Serializable
