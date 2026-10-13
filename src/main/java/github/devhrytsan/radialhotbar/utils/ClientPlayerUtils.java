@@ -2,6 +2,7 @@ package github.devhrytsan.radialhotbar.utils;
 
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 
 //? if >= 26.1 {
@@ -20,6 +21,22 @@ public class ClientPlayerUtils {
 		/*return clientWindow.getWindow();
 
 		 *///? }
+	}
+
+	public static Screen getScreen(Minecraft client) {
+		//? if >=26.2 {
+		/*return client.gui.screen();
+		*///? } else {
+		return client.screen;
+		 //? }
+	}
+
+	public static void setScreen(Minecraft client, Screen screen) {
+		//? if >=26.2 {
+		/*client.gui.setScreen(screen);
+		*///? } else {
+		client.setScreen(screen);
+		 //? }
 	}
 
 	public static int getPlayerSelectedSlot(LocalPlayer player) {

@@ -17,6 +17,9 @@ Currently supported platforms and versions:
 - 1.21.1 Fabric, NeoForge
 - 1.21.10 Fabric, NeoForge
 - 1.21.11 Fabric, NeoForge
+- 26.1.2 Fabric, NeoForge
+- 26.2 Fabric, NeoForge
+- 26.3 Fabric, NeoForge
 
 ### Download Links
 You can download Radial Hot Bar from the following platforms:

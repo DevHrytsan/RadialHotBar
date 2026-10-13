@@ -113,7 +113,7 @@ public class RadialMenuScreen extends Screen {
 	private void handleRender(GuiGraphicsLayer context,int mouseX, int mouseY, float delta){
 
 		//boolean isEnabled = FileConfigHandler.CONFIG_INSTANCE.modEnabled;
-		boolean hasScreen = client.screen != null;
+		boolean hasScreen = ClientPlayerUtils.getScreen(client) != null;
 		boolean isPaused = !client.isPaused();
 
 		if (hasScreen && isPaused) {
@@ -143,7 +143,7 @@ public class RadialMenuScreen extends Screen {
 
 	public void activate() {
 
-		if (client.screen == null) {
+		if (ClientPlayerUtils.getScreen(client) == null) {
 			if (client != null && client.player != null) {
 				int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
 
@@ -160,7 +160,7 @@ public class RadialMenuScreen extends Screen {
 			this.itemSelected = false;
 			// So basically it works it only allows when the player is playing the game and not looking at another menu.
 			active = true;
-			client.setScreen(INSTANCE);
+			ClientPlayerUtils.setScreen(client, INSTANCE);
 		}
 	}
 
@@ -173,8 +173,8 @@ public class RadialMenuScreen extends Screen {
 				handleSwapToRecent(mouseX, mouseY);
 			}
 		}
-		if (client.screen == INSTANCE) {
-			client.setScreen(null);
+		if (ClientPlayerUtils.getScreen(client) == INSTANCE) {
+			ClientPlayerUtils.setScreen(client, null);
 		}
 	}
 

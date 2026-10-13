@@ -8,7 +8,6 @@ import github.devhrytsan.radialhotbar.config.RadialHotBarConfig;
 import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
 import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.glfw.GLFW;
 
 
 public class RadialMenuController {
@@ -38,7 +37,7 @@ public class RadialMenuController {
 						if (RadialMenuScreen.INSTANCE.active) {
 							RadialMenuScreen.INSTANCE.deactivate(0,0);
 						} else {
-							if (client.screen == null || client.screen instanceof RadialMenuScreen) {
+							if (ClientPlayerUtils.getScreen(client) == null || ClientPlayerUtils.getScreen(client) instanceof RadialMenuScreen) {
 								RadialMenuScreen.INSTANCE.activate();
 							}
 						}
@@ -48,7 +47,7 @@ public class RadialMenuController {
 					if (radialMenuKeyDown != RadialMenuScreen.INSTANCE.active) {
 
 						if (radialMenuKeyDown) {
-							if ((client.screen == null || client.screen instanceof RadialMenuScreen)) {
+							if ((ClientPlayerUtils.getScreen(client) == null || ClientPlayerUtils.getScreen(client) instanceof RadialMenuScreen)) {
 								RadialMenuScreen.INSTANCE.activate();
 							}
 						} else {

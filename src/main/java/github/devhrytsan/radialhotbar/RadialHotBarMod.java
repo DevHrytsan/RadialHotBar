@@ -8,12 +8,13 @@ import github.devhrytsan.radialhotbar.menu.RadialMenuScreen;
 import github.devhrytsan.radialhotbar.config.RadialHotBarConfigScreen;
 
 import github.devhrytsan.radialhotbar.platform.Platform;
+import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
+import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.*;
 import net.minecraft.client.Minecraft;
 
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,8 +80,8 @@ public class RadialHotBarMod {
 	public static void InitializeModFabric() {
 		OPEN_RADIAL_MENU_KEY = new KeyMapping(
 				"key.category.radialhotbar.openkey",
-				InputConstants.Type.KEYSYM,
-				GLFW.GLFW_KEY_R,
+				KeyInputUtils.KEYBOARD_TYPE,
+				KeyInputUtils.DEFAULT_OPEN_MENU_KEY,
 				KEYBIND_CATEGORY
 		);
 
@@ -89,7 +90,7 @@ public class RadialHotBarMod {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			RadialMenuController.INSTANCE.HandleUpdate(client);
 
-			if (client.screen instanceof RadialMenuScreen) {
+			if (ClientPlayerUtils.getScreen(client) instanceof RadialMenuScreen) {
 				if(FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) RadialMenuMovementController.INSTANCE.handleMovement();
 			}
 		});
@@ -99,8 +100,8 @@ public class RadialHotBarMod {
 	/*public static void RegisterKeysNeoForge(RegisterKeyMappingsEvent event) {
 		OPEN_RADIAL_MENU_KEY = new KeyMapping(
 				"key.category.radialhotbar.openkey",
-				InputConstants.Type.KEYSYM,
-				GLFW.GLFW_KEY_R,
+				KeyInputUtils.KEYBOARD_TYPE,
+				KeyInputUtils.DEFAULT_OPEN_MENU_KEY,
 				KEYBIND_CATEGORY
 		);
 
@@ -117,7 +118,7 @@ public class RadialHotBarMod {
 				RadialMenuController.INSTANCE.HandleUpdate(clientI);
 			}
 
-			if (clientI.screen instanceof RadialMenuScreen) {
+			if (ClientPlayerUtils.getScreen(clientI) instanceof RadialMenuScreen) {
 				if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
 					boolean isMenuActive = RadialMenuScreen.INSTANCE.active;
 					RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
@@ -136,8 +137,8 @@ public class RadialHotBarMod {
 	/*public static void RegisterKeysForge(RegisterKeyMappingsEvent event) {
 		OPEN_RADIAL_MENU_KEY = new KeyMapping(
 				"key.category.radialhotbar.openkey",
-				InputConstants.Type.KEYSYM,
-				GLFW.GLFW_KEY_R,
+				KeyInputUtils.KEYBOARD_TYPE,
+				KeyInputUtils.DEFAULT_OPEN_MENU_KEY,
 				KEYBIND_CATEGORY
 		);
 		event.register(OPEN_RADIAL_MENU_KEY);
@@ -151,7 +152,7 @@ public class RadialHotBarMod {
 			if (event.phase == TickEvent.Phase.END) {
 				RadialMenuController.INSTANCE.HandleUpdate(clientI);
 
-				if (clientI.screen instanceof RadialMenuScreen) {
+				if (ClientPlayerUtils.getScreen(clientI) instanceof RadialMenuScreen) {
 				if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
 					boolean isMenuActive = RadialMenuScreen.INSTANCE.active;
 					RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
