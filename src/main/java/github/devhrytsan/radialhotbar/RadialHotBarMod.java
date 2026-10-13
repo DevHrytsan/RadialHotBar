@@ -124,12 +124,14 @@ public class RadialHotBarMod {
 				RadialMenuController.INSTANCE.HandleUpdate(clientI);
 			}
 
-			if (ClientPlayerUtils.getScreen(clientI) instanceof RadialMenuScreen) {
-				if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
-					boolean isMenuActive = RadialMenuScreen.INSTANCE.active;
-					RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
-					RadialMenuMovementController.INSTANCE.handleMovement();
-				}
+			boolean moveInMenu = ClientPlayerUtils.getScreen(clientI) instanceof RadialMenuScreen
+					&& RadialMenuScreen.INSTANCE.active
+					&& FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen;
+
+			// Runs every tick so the original key contexts are restored once the menu closes
+			RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(moveInMenu);
+			if (moveInMenu) {
+				RadialMenuMovementController.INSTANCE.handleMovement();
 			}
 		});
 
@@ -158,13 +160,15 @@ public class RadialHotBarMod {
 			if (event.phase == TickEvent.Phase.END) {
 				RadialMenuController.INSTANCE.HandleUpdate(clientI);
 
-				if (ClientPlayerUtils.getScreen(clientI) instanceof RadialMenuScreen) {
-				if (FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen) {
-					boolean isMenuActive = RadialMenuScreen.INSTANCE.active;
-					RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(isMenuActive);
+				boolean moveInMenu = ClientPlayerUtils.getScreen(clientI) instanceof RadialMenuScreen
+						&& RadialMenuScreen.INSTANCE.active
+						&& FileConfigHandler.CONFIG_INSTANCE.allowMovementWhileOpen;
+
+				// Runs every tick so the original key contexts are restored once the menu closes
+				RadialMenuMovementController.INSTANCE.updateMovementKeyContextNeoForge(moveInMenu);
+				if (moveInMenu) {
 					RadialMenuMovementController.INSTANCE.handleMovement();
 				}
-			}
 			}
 		});
 

@@ -159,6 +159,8 @@ public class RadialMenuScreen extends Screen {
 			}
 
 			this.itemSelected = false;
+			// A button still held from before opening (e.g. mining) must not count as a click
+			this.wasLeftMousePressed = KeyInputUtils.isHardwareKeyPressed(client.options.keyAttack, client.getWindow());
 			// So basically it works it only allows when the player is playing the game and not looking at another menu.
 			active = true;
 			ClientPlayerUtils.setScreen(client, INSTANCE);
@@ -299,6 +301,9 @@ public class RadialMenuScreen extends Screen {
 
 		ItemStack selectedStack = ItemStack.EMPTY; //Maybe I should do with ID
 
+		float adjustedMouseAngle = MathUtils.relativeAngle(centerX, centerY, mouseX, mouseY);
+		float distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+
 		for (int i = 0; i < totalItemsToDraw; i++) {
 
 			//double angleRad = (2 * Math.PI / totalItemsToDraw) * i - (Math.PI / 2);// Radians
@@ -317,13 +322,7 @@ public class RadialMenuScreen extends Screen {
 
 			float checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
 			float checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
-			boolean mouseIn;
-
-			float adjustedMouseAngle = MathUtils.relativeAngle(centerX, centerY, mouseX, mouseY);
-
-			float distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
-
-			mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+			boolean mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
 			float scale = mouseIn ? BASE_ITEM_SCALE_FACTOR * SELECTED_ITEM_SCALE_FACTOR : BASE_ITEM_SCALE_FACTOR * NOT_SELECTED_ITEM_SCALE_FACTOR;
 
@@ -348,28 +347,24 @@ public class RadialMenuScreen extends Screen {
 			}
 
             context.popMatrix();
+		}
 
-			//Render selected preview
-			if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
-				if (FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect && FileConfigHandler.CONFIG_INSTANCE.usePreviewPreviousItemOnNoSelect) {
-					boolean isInsideMinRadius = MathUtils.betweenTwoValues(distanceFromCenter, 0, minRadiusIgnore);
+		//Render selected preview
+		if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
+			if (FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect && FileConfigHandler.CONFIG_INSTANCE.usePreviewPreviousItemOnNoSelect) {
+				boolean isInsideMinRadius = MathUtils.betweenTwoValues(distanceFromCenter, 0, minRadiusIgnore);
 
-					if (!itemSelected && isInsideMinRadius) {
-						int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
+				if (!itemSelected && isInsideMinRadius) {
+					ItemStack lastUsedStack = getSlotStack(inventory, lastUsedSlot);
+					renderCenterItem(context, lastUsedStack);
 
-						ItemStack lastUsedStack = getSlotStack(inventory, lastUsedSlot);
-						renderCenterItem(context, lastUsedStack);
-
-					} else {
-						renderCenterItem(context, selectedStack);
-					}
 				} else {
 					renderCenterItem(context, selectedStack);
 				}
-
+			} else {
+				renderCenterItem(context, selectedStack);
 			}
 		}
-
 	}
 
 	private void renderCenterItem(GuiGraphicsLayer context, ItemStack itemStack) {
@@ -519,8 +514,7 @@ public class RadialMenuScreen extends Screen {
 
 				if (targetSlotType != null) {
 
-					boolean isArmorSlot = targetSlotType != null && targetSlotType.isArmor(); //|| slotType == EquipmentSlot.OFFHAND);
-					// EquipmentSlot.OFFHAND is used to be for check shields and similar items.
+					boolean isArmorSlot = MenuUtils.shouldAutoEquip(selectedStack, targetSlotType);
 
 					if (isArmorSlot) {
 						int validSlotId = sourceSlot;
