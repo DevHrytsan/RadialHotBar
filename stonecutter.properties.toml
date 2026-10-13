@@ -1,19 +1,43 @@
-mod.id = "radialhotbar"
-mod.name = "Radial Hot Bar"
-mod.group = "github.devhrytsan"
-mod.version = "0.6.0"
-mod.channel_tag = ""
-mod.description = "A faster way to access your items on hot bar"
-mod.authors = ["DevHrytsan"]
-mod.contributors = ["neuromuser"]
-mod.inception_year = "2026"
-mod.license.name = "MIT"
-mod.license.url = "https://github.com/DevHrytsan/RadialHotBar/blob/main/LICENSE"
-mod.license.dist = "repo"
-mod.sources_url = "https://github.com/DevHrytsan/RadialHotBar"
-mod.homepage_url = "https://modrinth.com/mod/radialhotbar"
-mod.issues_url = "https://github.com/DevHrytsan/RadialHotBar/issues"
-mod.discord_url = ""
+loomx.loom_version = "1.18-SNAPSHOT"
+
+[mod]
+id = "radialhotbar"
+name = "Radial Hot Bar"
+group = "github.devhrytsan"
+version = "0.6.0"
+channel_tag = ""
+description = "A faster way to access your items on hot bar"
+authors = ["DevHrytsan"]
+contributors = ["neuromuser"]
+inception_year = "2026"
+license.name = "MIT"
+license.url = "https://github.com/DevHrytsan/RadialHotBar/blob/main/LICENSE"
+license.dist = "repo"
+environment = "client_and_server"
+sources_url = "https://github.com/DevHrytsan/RadialHotBar"
+homepage_url = "https://modrinth.com/mod/radialhotbar"
+issues_url = "https://github.com/DevHrytsan/RadialHotBar/issues"
+discord_url = ""
+dev_jvm_args = [
+	"-XX:+IgnoreUnrecognizedVMOptions",
+	"-XX:+UseZGC",
+	"-XX:+HeapDumpOnOutOfMemoryError",
+	"-XX:HeapDumpPath=heapdump.hprof",
+	"-XX:+ShowCodeDetailsInExceptionMessages",
+	"-XX:+UseCompactObjectHeaders",
+	"-XX:+AlwaysPreTouch",
+	"-XX:+UseStringDeduplication",
+	"-Dfile.encoding=UTF-8"
+]
+dev_jvm_args_mixin_debug = [
+	"-Dmixin.env.remapRefMap=true",
+	"-Dmixin.debug.verbose=true",
+	"-Dmixin.debug.verify=true",
+	"-Dmixin.debug.countInjections=true",
+	"-Dmixin.debug=true",
+	"-Dmixin.debug.export=true"
+]
+
 [[mod.pom.developers]]
 id = "devhrytsan"
 name = "DevHrytsan"

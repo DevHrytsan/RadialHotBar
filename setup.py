@@ -90,6 +90,23 @@ def validate_group(value: str):
         )
 
 
+def validate_environment(value: str):
+    if value.lower() not in [
+        "client_only",
+        "server_only",
+        "dedicated_server_only",
+        "client_and_server",
+        "server_only_client_optional",
+        "client_only_server_optional",
+        "client_or_server_prefers_both",
+        "client_or_server",
+        "singleplayer_only",
+    ]:
+        abort(
+            "Environment must one of: client_only, server_only, dedicated_server_only, client_and_server, server_only_client_optional, client_only_server_optional, client_or_server_prefers_both, client_or_server, singleplayer_only."
+        )
+
+
 # file helpers
 
 
@@ -109,13 +126,27 @@ def regex_replace_in_file(path: Path, pattern: str, replacement: str):
     write(path, re.sub(pattern, replacement, read(path)))
 
 
+def has_mod_id(props_text: str, expected_id: str) -> bool:
+    mod_section = re.search(r"(?ms)^\[mod\]\s*\n(.*?)(?=^\[|\Z)", props_text)
+    if not mod_section:
+        return False
+    return (
+        re.search(
+            rf'^id\s*=\s*"{re.escape(expected_id)}"\s*$',
+            mod_section.group(1),
+            re.MULTILINE,
+        )
+        is not None
+    )
+
+
 ROOT = Path(__file__).parent.resolve()
 PROPS_FILE = ROOT / "stonecutter.properties.toml"
 
 if not PROPS_FILE.exists():
     abort("Run this script from the root of the stonecutter-mod-template repository.")
 
-if 'mod.id = "modtemplate"' not in read(PROPS_FILE):
+if not has_mod_id(read(PROPS_FILE), "modtemplate"):
     warn("stonecutter.properties.toml no longer contains the default mod.id.")
     confirm = ask(
         "Setup may have already been run. Continue anyway? [y/N]", default="N"
@@ -163,8 +194,14 @@ discord_url = ask("Discord invite URL", optional=True)
 modrinth_id = ask("Modrinth project ID", optional=True)
 curseforge_id = ask("CurseForge project ID", optional=True)
 
+mod_environment = ask(
+    "Environment (client_only, server_only, dedicated_server_only, client_and_server, server_only_client_optional, client_only_server_optional, client_or_server_prefers_both, client_or_server, singleplayer_only)",
+    default="client_and_server",
+)
+validate_environment(mod_environment)
+
 old_pkg = "com/example/modtemplate"
-new_pkg = mod_group.replace(".", "/") + f"/{mod_id}"
+new_pkg = f"{mod_group.replace(".", "/")}/{mod_id}"
 old_java_pkg = "com.example.modtemplate"
 new_java_pkg = f"{mod_group}.{mod_id}"
 
@@ -175,6 +212,7 @@ print(f"  mod.name     = {mod_name}")
 print(f"  mod.group    = {mod_group}")
 print(f"  mod.version  = {mod_version}{channel_tag}")
 print(f"  authors      = {to_toml_array(authors)}")
+print(f"  environment  = {mod_environment}")
 print(f"  package path = {new_pkg}")
 print()
 confirm = ask("Proceed? [Y/n]", default="Y")
@@ -189,6 +227,22 @@ info("Updating stonecutter.properties.toml ...")
 
 props_text = read(PROPS_FILE)
 
+# Preserve loomx.loom_version (and any other top-level loomx.* lines) if present
+loomx_lines = []
+for line in props_text.splitlines():
+    stripped = line.strip()
+    if stripped.startswith("loomx."):
+        loomx_lines.append(stripped)
+    elif (
+        stripped
+        and not stripped.startswith("#")
+        and "=" in stripped
+        and not stripped.startswith("mod.")
+        and not stripped.startswith("[[")
+    ):
+        # stop at first non-loomx, non-comment content that looks like a key=value
+        break
+
 match = re.search(r"^\[fabric\]", props_text, re.MULTILINE)
 if not match:
     abort("Could not find [fabric] section in stonecutter.properties.toml.")
@@ -199,23 +253,36 @@ pom_devs = "\n".join(
     for a in authors
 )
 
+dev_jvm_args_block = ""
+dev_args_start = props_text.find("dev_jvm_args =")
+if dev_args_start != -1:
+    pom_start = props_text.find("[[mod.pom.developers]]", dev_args_start)
+    if pom_start != -1:
+        dev_jvm_args_block = props_text[dev_args_start:pom_start].strip()
+
+loomx_block = ("\n".join(loomx_lines) + "\n\n") if loomx_lines else ""
+
 new_props = f"""\
-mod.id = "{mod_id}"
-mod.name = "{mod_name}"
-mod.group = "{mod_group}"
-mod.version = "{mod_version}"
-mod.channel_tag = "{channel_tag}"
-mod.description = "{description}"
-mod.authors = {to_toml_array(authors)}
-mod.contributors = {to_toml_array(contributors)}
-mod.inception_year = "{datetime.now().year}"
-mod.license.name = "{license_name}"
-mod.license.url = "{license_url}"
-mod.license.dist = "repo"
-mod.sources_url = "{sources_url}"
-mod.homepage_url = "{homepage_url}"
-mod.issues_url = "{issues_url}"
-mod.discord_url = "{discord_url}"
+{loomx_block}
+[mod]
+id = "{mod_id}"
+name = "{mod_name}"
+group = "{mod_group}"
+version = "{mod_version}"
+channel_tag = "{channel_tag}"
+description = "{description}"
+authors = {to_toml_array(authors)}
+contributors = {to_toml_array(contributors)}
+inception_year = "{datetime.now().year}"
+license.name = "{license_name}"
+license.url = "{license_url}"
+license.dist = "repo"
+sources_url = "{sources_url}"
+homepage_url = "{homepage_url}"
+issues_url = "{issues_url}"
+discord_url = "{discord_url}"
+environment = "{mod_environment}"
+{dev_jvm_args_block}
 {pom_devs}
 
 {versions_section}"""
@@ -251,7 +318,7 @@ new_java_root = ROOT / "src/main/java" / new_pkg
 if old_pkg != new_pkg and old_java_root.exists():
     info(f"Moving Java sources: {old_pkg} -> {new_pkg} ...")
     new_java_root.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(old_java_root, new_java_root)
+    shutil.copytree(old_java_root, new_java_root, dirs_exist_ok=True)
 
     for java_file in new_java_root.rglob("*.java"):
         replace_in_file(java_file, old_java_pkg, new_java_pkg)
@@ -260,6 +327,11 @@ if old_pkg != new_pkg and old_java_root.exists():
     for empty_dir in [ROOT / "src/main/java/com/example", ROOT / "src/main/java/com"]:
         if empty_dir.exists() and not any(empty_dir.iterdir()):
             empty_dir.rmdir()
+
+datagen_root = ROOT / "versions" / "datagen"
+if datagen_root.exists():
+    info("Removing stale generated datagen output ...")
+    shutil.rmtree(datagen_root)
 
 # .env
 

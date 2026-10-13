@@ -10,11 +10,11 @@ data class FabricManifest(
 	val authors: List<String>,
 	val contributors: List<String>,
 	val contact: Map<String, String>,
-	val custom: JsonObject,
+	val custom: JsonObject?,
 	val description: String,
 	val icon: String,
 	val license: String,
-	val environment: String = "*",
+	val environment: String,
 	val accessWidener: String,
 	val entrypoints: Map<String, List<String>>,
 	val mixins: List<String>,
@@ -30,9 +30,11 @@ data class ForgeManifest(
 	val loaderVersion: String = "[2,)",
 	val license: String,
 	val issueTrackerURL: String,
+	val clientSideOnly: Boolean,
 	val mods: List<ForgeMod>,
 	val dependencies: Map<String, List<ForgeDependency>> = emptyMap(),
-	val mixins: List<ForgeMixin> = emptyList()
+	val mixins: List<ForgeMixin> = emptyList(),
+	val accessTransformers: List<ForgeAccessTransformer> = emptyList()
 )
 
 @Serializable
@@ -43,6 +45,7 @@ data class ForgeMod(
 	val displayURL: String,
 	val modUrl: String,
 	val logoFile: String,
+	val iconFile: String,
 	val authors: String,
 	val logoBlur: Boolean = false,
 	val credits: String,
@@ -60,3 +63,6 @@ data class ForgeDependency(
 
 @Serializable
 data class ForgeMixin(val config: String)
+
+@Serializable
+data class ForgeAccessTransformer(val file: String)

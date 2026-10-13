@@ -4,9 +4,6 @@ plugins {
 }
 
 stonecutter {
-	val (version, loader) = current.project.split('-', limit = 2)
-	properties.tags(version, loader)
-
 	replacements.string(current.parsed >= "1.21.11") {
 		replace("ResourceLocation", "Identifier")
 		replace("location()", "identifier()")
@@ -20,9 +17,9 @@ platform {
 			forgeLikeVersionRange = prop("deps.minecraft")
 		}
 		required("neoforge") {
-			forgeLikeVersionRange.set("[1,)")
+			forgeLikeVersionRange.set("[${prop("deps.neoforge")},)")
 		}
-		required(modid = "cloth_config") {
+		required("cloth_config") {
 			slug("cloth-config")
 			forgeLikeVersionRange = "[${prop("deps.cloth-config")},)"
 		}
@@ -41,16 +38,20 @@ neoForge {
 	}
 
 	runs {
+		val devJvmArgs = propsList("mod", "dev_jvm_args") +
+			propsList("mod", "dev_jvm_args_mixin_debug")
 		register("client") {
 			client()
 			gameDirectory = file("run/")
 			ideName = "NeoForge Client (${stonecutter.current.version})"
 			programArgument("--username=Dev")
+			jvmArguments.addAll(devJvmArgs)
 		}
 		register("server") {
 			server()
 			gameDirectory = file("run/")
 			ideName = "NeoForge Server (${stonecutter.current.version})"
+			jvmArguments.addAll(devJvmArgs)
 		}
 	}
 
@@ -59,14 +60,12 @@ neoForge {
 			sourceSet(sourceSets["main"])
 		}
 	}
-	sourceSets["main"].resources.srcDir("${rootDir}/versions/datagen/${sc.current.version.split("-")[0]}/src/main/generated")
+	sourceSets["main"].resources.srcDir("${rootDir}/versions/datagen/${sc.current.version}/src/main/generated")
 }
 
 repositories {
 	mavenCentral()
 	maven("https://maven.shedaniel.me/")
-	maven("https://maven.neoforged.net/releases/")
-
 	strictMaven("https://maven.terraformersmc.com/", "com.terraformersmc") { name = "TerraformersMC" }
 	strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
 }
