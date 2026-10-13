@@ -13,4 +13,11 @@ public class RadialHotBarConfig {
     public boolean useAutoEquipArmor = true; // Whether the radial menu should automatically equip armor when selected.
 	public boolean useSwapToRecentOnNoSelect = false; //If no slot is selected in the radial menu, the radial menu swaps between the current and previously used slots
 	public boolean usePreviewPreviousItemOnNoSelect = false; // Shows the previously used item in the center when no slot is selected
+	public boolean useTenthSlotCompat = true; // Shows the "Tenth Slot" mod's empty hand slot in the radial menu (when that mod is installed)
+	public boolean[] enabledSlots = {true, true, true, true, true, true, true, true, true}; // Which hotbar slots (1-9) appear in the radial menu
+
+	public boolean isSlotEnabled(int slot) {
+		// Missing or malformed entries (e.g. older config files) count as enabled
+		return enabledSlots == null || slot < 0 || slot >= enabledSlots.length || enabledSlots[slot];
+	}
 }

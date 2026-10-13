@@ -1,2 +1,4 @@
 accessWidener v2 named
 
+# Tenth Slot compatibility: its empty hand slot is selected == 9, which setSelectedSlot() rejects
+accessible field net/minecraft/world/entity/player/Inventory selected I

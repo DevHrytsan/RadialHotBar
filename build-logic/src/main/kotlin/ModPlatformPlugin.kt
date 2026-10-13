@@ -1,74 +1,29 @@
-@file:Suppress("unused", "DuplicatedCode")
-
 import dev.kikugie.fletching_table.extension.FletchingTableExtension
-import dev.kikugie.stonecutter.StonecutterExperimentalAPI
-import dev.kikugie.stonecutter.build.StonecutterBuildExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.gradle.internal.extensions.stdlib.toDefaultLowerCase
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.attributes
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.expand
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withType
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import javax.inject.Inject
-
-val Project.sc: StonecutterBuildExtension
-	get() = extensions.getByType<StonecutterBuildExtension>()
-
-@OptIn(StonecutterExperimentalAPI::class)
-fun Project.prop(name: String): String = (project.sc.properties.get<String>(name))
-
-fun Project.env(variable: String): String? = providers.environmentVariable(variable).orNull ?: dotEnv()[variable]
-
-fun Project.envTrue(variable: String): Boolean = env(variable)?.toDefaultLowerCase() == "true"
-
-fun RepositoryHandler.strictMaven(
-	url: String, vararg groups: String, configure: MavenArtifactRepository.() -> Unit = {}
-) = exclusiveContent {
-	forRepository { maven(url) { configure() } }
-	filter { groups.forEach(::includeGroup) }
-}
-
-private fun Project.dotEnv(): Map<String, String> {
-	val file = rootProject.file(".env")
-	if (!file.exists()) return emptyMap()
-	return file.readLines()
-		.mapNotNull { raw ->
-			val line = raw.trim()
-			if (line.isEmpty() || line.startsWith("#")) return@mapNotNull null
-			val split = line.indexOf('=')
-			if (split <= 0) return@mapNotNull null
-			val key = line.substring(0, split).trim()
-			val value = line.substring(split + 1).trim().trim('"', '\'')
-			key to value
-		}
-		.toMap()
-}
-
-abstract class GenerateModManifestTask : DefaultTask() {
-	@get:Input
-	abstract val content: Property<String>
-
-	@get:OutputFile
-	abstract val outputFile: RegularFileProperty
-
-	@TaskAction
-	fun generate() {
-		val file = outputFile.get().asFile
-		file.parentFile.mkdirs()
-		file.writeText(content.get())
-	}
-}
 
 abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 	override fun apply(project: Project) = with(project) {
@@ -76,31 +31,56 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 
 		val extension = extensions.create("platform", ModPlatformExtension::class.java).apply {
 			loader.convention(inferredLoader.id)
-			jarTask.convention(inferredLoader.jarTask)
-			sourcesJarTask.convention(inferredLoader.sourcesJarTask)
 		}
 
-		listOf("org.jetbrains.kotlin.jvm", "com.google.devtools.ksp", "dev.kikugie.fletching-table").forEach {
+		when (inferredLoader) {
+			is Loader.Fabric -> {
+				extension.jarTask.convention(providers.provider {
+					extensions.getByType<dev.kikugie.loomx.LoomCompatProjectExtension>().modJar.name
+				})
+				extension.sourcesJarTask.convention(providers.provider {
+					extensions.getByType<dev.kikugie.loomx.LoomCompatProjectExtension>().modSourcesJar.name
+				})
+			}
+
+			is Loader.Forge -> {
+				extension.jarTask.convention("reobfJar")
+				extension.sourcesJarTask.convention("sourcesJar")
+			}
+
+			else -> {
+				extension.jarTask.convention("jar")
+				extension.sourcesJarTask.convention("sourcesJar")
+			}
+		}
+
+		listOf(
+			"org.jetbrains.kotlin.jvm",
+			"com.google.devtools.ksp",
+			"dev.kikugie.fletching-table",
+			"me.modmuss50.mod-publish-plugin"
+		).forEach {
 			apply(
 				plugin = it
 			)
 		}
 
-		afterEvaluate {
-			val ctx = Context(
-				project = this,
-				extension = extension,
-				loader = Loader.of(extension.loader.get()),
-				stonecutter = project.sc
-			)
-			configureProject(ctx)
-		}
+		val (version, loader) = name.split('-', limit = 2)
+		project.sc.properties.tags(version, loader)
+
+		val ctx = Context(
+			project = this,
+			extension = extension,
+			loader = Loader.of(extension.loader.get()),
+			stonecutter = project.sc
+		)
+		configureProject(ctx)
 	}
 
 	private fun Project.configureProject(ctx: Context) {
-		listOf("java", "me.modmuss50.mod-publish-plugin", "idea").forEach { apply(plugin = it) }
-
 		version = ctx.fullVersion
+
+		listOf("java", "idea").forEach { apply(plugin = it) }
 		ctx.extension.requiredJava.set(ctx.javaVersion)
 
 		if (ctx.loader.isFabricLike) {
@@ -120,6 +100,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 		configureModPublishing(ctx)
 
 		if (envTrue("PUB_MAVEN_ENABLE")) {
+			apply(plugin = "com.vanniktech.maven.publish")
 			configureMavenPublishing(ctx)
 		}
 	}
@@ -130,11 +111,28 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			withJavadocJar()
 			sourceCompatibility = ctx.javaVersion
 			targetCompatibility = ctx.javaVersion
+			toolchain {
+				languageVersion.set(JavaLanguageVersion.of(ctx.javaVersion.majorVersion))
+			}
 		}
 	}
 
 	private fun Project.registerGenerateManifestTask(ctx: Context) {
 		val manifestOutputDir = layout.buildDirectory.dir("generated/modManifest")
+		abstract class GenerateModManifestTask : DefaultTask() {
+			@get:Input
+			abstract val content: Property<String>
+
+			@get:OutputFile
+			abstract val outputFile: RegularFileProperty
+
+			@TaskAction
+			fun generate() {
+				val file = outputFile.get().asFile
+				file.parentFile.mkdirs()
+				file.writeText(content.get())
+			}
+		}
 		val generateTask = tasks.register<GenerateModManifestTask>("generateModManifest") {
 			content.set(ctx.loader.generateManifest(ctx))
 			outputFile.set(layout.buildDirectory.file("generated/modManifest/${ctx.loader.modManifestPath}"))
@@ -142,20 +140,17 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 
 		the<JavaPluginExtension>().sourceSets.named("main") { resources.srcDir(manifestOutputDir) }
 		tasks.named<ProcessResources>("processResources") { dependsOn(generateTask) }
-		tasks.withType<Jar>().configureEach {
-			if (name == ctx.loader.sourcesJarTask) {
-				dependsOn(generateTask)
-			}
-		}
 	}
 
 	private fun Project.configureProcessResources(ctx: Context) {
+		val javaVersionValue = "JAVA_${ctx.javaVersion.majorVersion}"
+		val excluded = ctx.loader.excludedResources
 		tasks.named<ProcessResources>("processResources") {
 			dependsOn(tasks.named("stonecutterGenerate"), "kspKotlin")
 			filesMatching("*.mixins.json") {
-				expand("java" to "JAVA_${ctx.javaVersion.majorVersion}")
+				expand("java" to javaVersionValue)
 			}
-			exclude(ctx.loader.excludedResources)
+			exclude(excluded)
 		}
 	}
 

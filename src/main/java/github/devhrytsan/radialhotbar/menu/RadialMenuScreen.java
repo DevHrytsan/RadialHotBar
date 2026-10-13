@@ -3,6 +3,7 @@ package github.devhrytsan.radialhotbar.menu;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
 import github.devhrytsan.radialhotbar.compatibility.GuiGraphicsLayer;
+import github.devhrytsan.radialhotbar.compatibility.TenthSlotCompat;
 import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 import github.devhrytsan.radialhotbar.utils.MathUtils;
 import github.devhrytsan.radialhotbar.utils.MenuUtils;
@@ -68,11 +69,14 @@ public class RadialMenuScreen extends Screen {
 	// But for a project of that size, it’s not really necessary.
 	public static final RadialMenuScreen INSTANCE = new RadialMenuScreen();
 
+	private GuiGraphicsLayer guiContextLayer;
+
 	public boolean active = false;
 
 	public RadialMenuScreen() {
 		super(Component.translatable("main.radialhotbar.title"));
 		slotsToDraw = new ArrayList<>(MAX_SLOTS_COUNT);
+		guiContextLayer = new GuiGraphicsLayer();
 	}
 
 	@Override
@@ -94,23 +98,23 @@ public class RadialMenuScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 		super.extractRenderState(context, mouseX, mouseY, delta);
 
-		GuiGraphicsLayer guiСontextLayer = new GuiGraphicsLayer(context);
-		handleRender(guiСontextLayer, mouseX, mouseY, delta);
+		guiContextLayer.setContext(context);
+		handleRender(guiContextLayer, mouseX, mouseY, delta);
 	}
 	*///? } else {
 	@Override
 	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.render(context, mouseX, mouseY, delta);
 
-		GuiGraphicsLayer guiСontextLayer = new GuiGraphicsLayer(context);
-		handleRender(guiСontextLayer, mouseX, mouseY, delta);
+		guiContextLayer.setContext(context);
+		handleRender(guiContextLayer, mouseX, mouseY, delta);
 	}
 	//? }
 
 	private void handleRender(GuiGraphicsLayer context,int mouseX, int mouseY, float delta){
 
 		//boolean isEnabled = FileConfigHandler.CONFIG_INSTANCE.modEnabled;
-		boolean hasScreen = client.screen != null;
+		boolean hasScreen = ClientPlayerUtils.getScreen(client) != null;
 		boolean isPaused = !client.isPaused();
 
 		if (hasScreen && isPaused) {
@@ -140,7 +144,7 @@ public class RadialMenuScreen extends Screen {
 
 	public void activate() {
 
-		if (client.screen == null) {
+		if (ClientPlayerUtils.getScreen(client) == null) {
 			if (client != null && client.player != null) {
 				int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
 
@@ -155,9 +159,11 @@ public class RadialMenuScreen extends Screen {
 			}
 
 			this.itemSelected = false;
+			// A button still held from before opening (e.g. mining) must not count as a click
+			this.wasLeftMousePressed = KeyInputUtils.isHardwareKeyPressed(client.options.keyAttack, client.getWindow());
 			// So basically it works it only allows when the player is playing the game and not looking at another menu.
 			active = true;
-			client.setScreen(INSTANCE);
+			ClientPlayerUtils.setScreen(client, INSTANCE);
 		}
 	}
 
@@ -170,8 +176,8 @@ public class RadialMenuScreen extends Screen {
 				handleSwapToRecent(mouseX, mouseY);
 			}
 		}
-		if (client.screen == INSTANCE) {
-			client.setScreen(null);
+		if (ClientPlayerUtils.getScreen(client) == INSTANCE) {
+			ClientPlayerUtils.setScreen(client, null);
 		}
 	}
 
@@ -232,6 +238,8 @@ public class RadialMenuScreen extends Screen {
 		slotsToDraw.clear();
 
 		for (int i = 0; i < MAX_SLOTS_COUNT; i++) {
+			if (!FileConfigHandler.CONFIG_INSTANCE.isSlotEnabled(i)) continue;
+
 			if (!FileConfigHandler.CONFIG_INSTANCE.hideEmptySlots || !inventory.getItem(i).isEmpty()) {
 				slotsToDraw.add(i);
 			}
@@ -252,6 +260,10 @@ public class RadialMenuScreen extends Screen {
 				// If categories are the same, sort by item name to keep it
 				return stackA.getHoverName().getString().compareTo(stackB.getHoverName().getString());
 			});
+		}
+
+		if (TenthSlotCompat.isShownInMenu()) {
+			slotsToDraw.add(TenthSlotCompat.TENTH_SLOT_INDEX);
 		}
 
 		totalItemsToDraw = slotsToDraw.size();
@@ -289,6 +301,9 @@ public class RadialMenuScreen extends Screen {
 
 		ItemStack selectedStack = ItemStack.EMPTY; //Maybe I should do with ID
 
+		float adjustedMouseAngle = MathUtils.relativeAngle(centerX, centerY, mouseX, mouseY);
+		float distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
+
 		for (int i = 0; i < totalItemsToDraw; i++) {
 
 			//double angleRad = (2 * Math.PI / totalItemsToDraw) * i - (Math.PI / 2);// Radians
@@ -307,17 +322,11 @@ public class RadialMenuScreen extends Screen {
 
 			float checkStart = MathUtils.normalizeAngle(angleDeg - halfAnglePerItem);
 			float checkEnd = MathUtils.normalizeAngle(checkStart + anglePerItem);
-			boolean mouseIn;
-
-			float adjustedMouseAngle = MathUtils.relativeAngle(centerX, centerY, mouseX, mouseY);
-
-			float distanceFromCenter = MathUtils.calculateDistanceBetweenPoints(centerX, centerY, mouseX, mouseY);
-
-			mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
+			boolean mouseIn = MathUtils.betweenTwoValues(distanceFromCenter, minRadiusIgnore, maxRadiusIgnore) ? MathUtils.isAngleBetween(adjustedMouseAngle, checkStart, checkEnd) : false;
 
 			float scale = mouseIn ? BASE_ITEM_SCALE_FACTOR * SELECTED_ITEM_SCALE_FACTOR : BASE_ITEM_SCALE_FACTOR * NOT_SELECTED_ITEM_SCALE_FACTOR;
 
-			ItemStack stack = inventory.getItem(realSlotIndex);
+			ItemStack stack = getSlotStack(inventory, realSlotIndex);
 
 			if (mouseIn) {
 				selectedStack = stack;
@@ -331,29 +340,31 @@ public class RadialMenuScreen extends Screen {
 			context.renderItem(stack, 0, 0);
 			context.renderItemDecoration(textRenderer, stack, 0, 0);
 
+			if (TenthSlotCompat.isTenthSlot(realSlotIndex)) {
+				// The empty hand slot has no item to draw, so label it instead
+				String label = Component.translatable("radialhotbar.tenthslot.label").getString();
+				context.drawString(textRenderer, label, 8 - textRenderer.width(label) / 2, 8 - textRenderer.lineHeight / 2, 0xFFFFFFFF, true);
+			}
+
             context.popMatrix();
+		}
 
-			//Render selected preview
-			if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
-				if (FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect && FileConfigHandler.CONFIG_INSTANCE.usePreviewPreviousItemOnNoSelect) {
-					boolean isInsideMinRadius = MathUtils.betweenTwoValues(distanceFromCenter, 0, minRadiusIgnore);
+		//Render selected preview
+		if (FileConfigHandler.CONFIG_INSTANCE.useCenterItemPreview) {
+			if (FileConfigHandler.CONFIG_INSTANCE.useSwapToRecentOnNoSelect && FileConfigHandler.CONFIG_INSTANCE.usePreviewPreviousItemOnNoSelect) {
+				boolean isInsideMinRadius = MathUtils.betweenTwoValues(distanceFromCenter, 0, minRadiusIgnore);
 
-					if (!itemSelected && isInsideMinRadius) {
-						int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
+				if (!itemSelected && isInsideMinRadius) {
+					ItemStack lastUsedStack = getSlotStack(inventory, lastUsedSlot);
+					renderCenterItem(context, lastUsedStack);
 
-						ItemStack lastUsedStack = inventory.getItem(lastUsedSlot);
-						renderCenterItem(context, lastUsedStack);
-
-					} else {
-						renderCenterItem(context, selectedStack);
-					}
 				} else {
 					renderCenterItem(context, selectedStack);
 				}
-
+			} else {
+				renderCenterItem(context, selectedStack);
 			}
 		}
-
 	}
 
 	private void renderCenterItem(GuiGraphicsLayer context, ItemStack itemStack) {
@@ -433,9 +444,18 @@ public class RadialMenuScreen extends Screen {
 		}
 	}
 
+	private ItemStack getSlotStack(Inventory inventory, int slot) {
+		// Index 9 is the first main inventory slot, not Tenth Slot's empty hand
+		return TenthSlotCompat.isTenthSlot(slot) ? ItemStack.EMPTY : inventory.getItem(slot);
+	}
+
 	private void handleInteraction(int sourceSlot) {
 
-		ClientPlayerUtils.setPlayerSelectedSlot(client.player, sourceSlot);
+		if (TenthSlotCompat.isTenthSlot(sourceSlot)) {
+			TenthSlotCompat.select(client.player);
+		} else {
+			ClientPlayerUtils.setPlayerSelectedSlot(client.player, sourceSlot);
+		}
 
 		if (client.getConnection() != null) {
 			client.getConnection().send(new ServerboundSetCarriedItemPacket(sourceSlot));
@@ -465,6 +485,11 @@ public class RadialMenuScreen extends Screen {
 
 	private void handleInventorySwap(int sourceSlot) {
 
+		if (TenthSlotCompat.isTenthSlot(sourceSlot)) {
+			handleInteraction(sourceSlot);
+			return;
+		}
+
 		if (sourceSlot >= 0 && sourceSlot < 9) {
 
 			if (FileConfigHandler.CONFIG_INSTANCE.useAutoEquipArmor) {
@@ -489,8 +514,7 @@ public class RadialMenuScreen extends Screen {
 
 				if (targetSlotType != null) {
 
-					boolean isArmorSlot = targetSlotType != null && targetSlotType.isArmor(); //|| slotType == EquipmentSlot.OFFHAND);
-					// EquipmentSlot.OFFHAND is used to be for check shields and similar items.
+					boolean isArmorSlot = MenuUtils.shouldAutoEquip(selectedStack, targetSlotType);
 
 					if (isArmorSlot) {
 						int validSlotId = sourceSlot;

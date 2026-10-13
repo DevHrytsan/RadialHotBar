@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.*;
 
@@ -19,8 +20,8 @@ public class MenuUtils {
 	 * 0: Tools
 	 * 1: Weapons
 	 * 2: Food
-	 * 3: Blocks
-	 * 4: Potions
+	 * 3: Potions
+	 * 4: Blocks
 	 * 5: Everything else
 	 * 6: Empty
 	 */
@@ -32,12 +33,17 @@ public class MenuUtils {
 		// Now little hell begins
 
 		//? if >=1.21.5 {
-		// Modern logic using Data Components
+		// Modern logic using Data Components.
+		// Every tool and sword has both TOOL and WEAPON, so weapons are checked first by tag/type.
+		boolean isWeapon = stack.is(ItemTags.SWORDS)
+				|| (stack.has(DataComponents.WEAPON) && !stack.has(DataComponents.TOOL)) // mace, spear
+				|| item instanceof ProjectileWeaponItem
+				|| item instanceof TridentItem;
+		if (isWeapon) {
+			return 1;
+		}
 		if (stack.has(DataComponents.TOOL)) {
 			return 0;
-		}
-		if (stack.has(DataComponents.WEAPON)) {
-			return 1;
 		}
 		if (stack.has(DataComponents.FOOD)) {
 			return 2;
@@ -104,6 +110,14 @@ public class MenuUtils {
 
 		*///? }
 
+	}
+
+	// Carved pumpkins and mob heads are wearable but are blocks the player wants to place,
+	// and animal armor (BODY slot) has no slot in the player's inventory menu.
+	public static boolean shouldAutoEquip(ItemStack stack, EquipmentSlot slot) {
+		if (slot == null || !slot.isArmor()) return false;
+		if (stack.getItem() instanceof BlockItem) return false;
+		return getArmorSlot(slot) != -1;
 	}
 
 	public static int getArmorSlot(EquipmentSlot slot) {

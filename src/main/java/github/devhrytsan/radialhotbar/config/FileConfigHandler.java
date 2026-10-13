@@ -2,6 +2,8 @@ package github.devhrytsan.radialhotbar.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
+import github.devhrytsan.radialhotbar.Constants;
 import github.devhrytsan.radialhotbar.RadialHotBarMod;
 
 import java.io.File;
@@ -17,10 +19,18 @@ public class FileConfigHandler {
     public static void loadConfig() {
         if (settingsFile.exists()) {
             try (FileReader reader = new FileReader(settingsFile)) {
-                CONFIG_INSTANCE = baseGson.fromJson(reader, RadialHotBarConfig.class);
-            } catch (IOException e) {
-                RadialHotBarMod.MAIN_LOGGER.error("Could not load Radial Hotbar config!", e);
+                RadialHotBarConfig loaded = baseGson.fromJson(reader, RadialHotBarConfig.class);
+                if (loaded != null) {
+                    CONFIG_INSTANCE = loaded;
+                } else {
+                    // Empty file. Defaults are used and the file is left untouched
+                    RadialHotBarMod.MAIN_LOGGER.warn("Radial Hotbar config is empty, using defaults.");
+                }
+            } catch (IOException | JsonParseException e) {
+                // Broken JSON. Defaults are used and the file is left untouched so it can be fixed by hand
+                RadialHotBarMod.MAIN_LOGGER.error("Could not load Radial Hotbar config, using defaults!", e);
             }
+            CONFIG_INSTANCE.scaleFactor = Math.max(Constants.MIN_SCALE_FACTOR, Math.min(Constants.MAX_SCALE_FACTOR, CONFIG_INSTANCE.scaleFactor));
         } else {
             saveConfig();
         }

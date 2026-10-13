@@ -27,5 +27,11 @@
   "config.radialhotbar.option.swapToRecentOnNoSelect": "Перемикатися на попередньо використаний слот (Якщо без вибору)",
   "config.radialhotbar.option.swapToRecentOnNoSelect.tooltip": "Якщо в радіальному меню не вибрано жодного слота, відбувається перемикання між поточним і попередньо використаним слотами.",
   "config.radialhotbar.option.previousItemInCenterOnNoSelect": "Відобразити попередній предмет у центрі",
-  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "Якщо слот не обрано, радіальне меню показує останній використаний предмет у центрі."
+  "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "Якщо слот не обрано, радіальне меню показує останній використаний предмет у центрі.",
+  "config.radialhotbar.option.enabledSlots": "Увімкнені слоти",
+  "config.radialhotbar.option.enabledSlots.tooltip": "Оберіть, які слоти панелі (1-9) відображаються в радіальному меню.",
+  "config.radialhotbar.option.enabledSlots.slot": "Слот %s",
+  "config.radialhotbar.option.tenthSlotCompat": "Сумісність з Tenth Slot",
+  "config.radialhotbar.option.tenthSlotCompat.tooltip": "Показує слот порожньої руки з моду Tenth Slot у радіальному меню.",
+  "radialhotbar.tenthslot.label": "Рука"
 }

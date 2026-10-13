@@ -9,6 +9,10 @@ gradlePlugin {
 			id = "mod-platform"
 			implementationClass = "ModPlatformPlugin"
 		}
+		register("modRoot") {
+			id = "mod-root"
+			implementationClass = "ModRootPlugin"
+		}
 	}
 }
 
@@ -25,6 +29,7 @@ repositories {
 dependencies {
 	implementation(libs.kikugie.postprocess)
 	implementation(libs.kikugie.stonecutter)
+	implementation(libs.kikugie.loomx)
 	implementation(libs.mod.publish.plugin)
 	implementation(libs.foojay.resolver)
 	implementation(libs.fletching.table)

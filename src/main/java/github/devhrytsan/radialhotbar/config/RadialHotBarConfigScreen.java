@@ -1,6 +1,7 @@
 package github.devhrytsan.radialhotbar.config;
 
 import github.devhrytsan.radialhotbar.Constants;
+import github.devhrytsan.radialhotbar.compatibility.TenthSlotCompat;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -107,6 +108,35 @@ public class RadialHotBarConfigScreen {
 		general.addEntry(autoEquipArmor);
 		general.addEntry(swapToRecentNoSelectToggle);
 		general.addEntry(showPreviousItemOnCenterToggle);
+
+		var enabledSlotsCategory = entryBuilder.startSubCategory(Component.translatable("config.radialhotbar.option.enabledSlots"))
+				.setTooltip(Component.translatable("config.radialhotbar.option.enabledSlots.tooltip"));
+
+		for (int i = 0; i < 9; i++) {
+			final int slot = i;
+			enabledSlotsCategory.add(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.enabledSlots.slot", slot + 1), FileConfigHandler.CONFIG_INSTANCE.isSlotEnabled(slot))
+					.setDefaultValue(true)
+					.setSaveConsumer(newValue -> {
+						RadialHotBarConfig config = FileConfigHandler.CONFIG_INSTANCE;
+						if (config.enabledSlots == null || config.enabledSlots.length != 9) {
+							boolean[] fixed = new boolean[9];
+							for (int j = 0; j < 9; j++) fixed[j] = config.isSlotEnabled(j);
+							config.enabledSlots = fixed;
+						}
+						config.enabledSlots[slot] = newValue;
+					})
+					.build());
+		}
+
+		general.addEntry(enabledSlotsCategory.build());
+
+		if (TenthSlotCompat.isLoaded()) {
+			general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.tenthSlotCompat"), FileConfigHandler.CONFIG_INSTANCE.useTenthSlotCompat)
+					.setDefaultValue(true)
+					.setTooltip(Component.translatable("config.radialhotbar.option.tenthSlotCompat.tooltip"))
+					.setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useTenthSlotCompat = newValue)
+					.build());
+		}
 
         return builder.build();
     }

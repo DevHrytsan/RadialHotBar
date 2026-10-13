@@ -13,17 +13,29 @@ import net.minecraft.client.gui.GuiGraphics;
 public class GuiGraphicsLayer { //Backward compatibility hell
 
 	//? if >= 26.1 {
-	/*private final GuiGraphicsExtractor instance;
-	*///? } else {
-	private final GuiGraphics instance;
-	 //? }
+	/*private GuiGraphicsExtractor instance;
+	 *///? } else {
+	private GuiGraphics instance;
+	//? }
+
+	public GuiGraphicsLayer(){
+
+	}
 
 	public GuiGraphicsLayer(Object graphicsObject) {
 		//? if >= 26.1 {
 		/*this.instance = (GuiGraphicsExtractor) graphicsObject;
-		*///? } else {
+		 *///? } else {
 		this.instance = (GuiGraphics) graphicsObject;
-		 //? }
+		//? }
+	}
+
+	public void setContext(Object graphicsObject){
+		//? if >= 26.1 {
+		/*this.instance = (GuiGraphicsExtractor) graphicsObject;
+		 *///? } else {
+		this.instance = (GuiGraphics) graphicsObject;
+		//? }
 	}
 
 	public void pushMatrix() {
