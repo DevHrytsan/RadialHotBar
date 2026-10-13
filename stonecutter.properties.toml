@@ -1,7 +1,7 @@
 mod.id = "radialhotbar"
 mod.name = "Radial Hot Bar"
 mod.group = "github.devhrytsan"
-mod.version = "0.5.2"
+mod.version = "0.6.0"
 mod.channel_tag = ""
 mod.description = "A faster way to access your items on hot bar"
 mod.authors = ["DevHrytsan"]
