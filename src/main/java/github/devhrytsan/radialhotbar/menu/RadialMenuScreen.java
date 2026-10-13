@@ -3,6 +3,7 @@ package github.devhrytsan.radialhotbar.menu;
 import github.devhrytsan.radialhotbar.config.FileConfigHandler;
 import github.devhrytsan.radialhotbar.utils.ClientPlayerUtils;
 import github.devhrytsan.radialhotbar.compatibility.GuiGraphicsLayer;
+import github.devhrytsan.radialhotbar.compatibility.TenthSlotCompat;
 import github.devhrytsan.radialhotbar.utils.KeyInputUtils;
 import github.devhrytsan.radialhotbar.utils.MathUtils;
 import github.devhrytsan.radialhotbar.utils.MenuUtils;
@@ -259,6 +260,10 @@ public class RadialMenuScreen extends Screen {
 			});
 		}
 
+		if (TenthSlotCompat.isShownInMenu()) {
+			slotsToDraw.add(TenthSlotCompat.TENTH_SLOT_INDEX);
+		}
+
 		totalItemsToDraw = slotsToDraw.size();
 	}
 
@@ -322,7 +327,7 @@ public class RadialMenuScreen extends Screen {
 
 			float scale = mouseIn ? BASE_ITEM_SCALE_FACTOR * SELECTED_ITEM_SCALE_FACTOR : BASE_ITEM_SCALE_FACTOR * NOT_SELECTED_ITEM_SCALE_FACTOR;
 
-			ItemStack stack = inventory.getItem(realSlotIndex);
+			ItemStack stack = getSlotStack(inventory, realSlotIndex);
 
 			if (mouseIn) {
 				selectedStack = stack;
@@ -336,6 +341,12 @@ public class RadialMenuScreen extends Screen {
 			context.renderItem(stack, 0, 0);
 			context.renderItemDecoration(textRenderer, stack, 0, 0);
 
+			if (TenthSlotCompat.isTenthSlot(realSlotIndex)) {
+				// The empty hand slot has no item to draw, so label it instead
+				String label = Component.translatable("radialhotbar.tenthslot.label").getString();
+				context.drawString(textRenderer, label, 8 - textRenderer.width(label) / 2, 8 - textRenderer.lineHeight / 2, 0xFFFFFFFF, true);
+			}
+
             context.popMatrix();
 
 			//Render selected preview
@@ -346,7 +357,7 @@ public class RadialMenuScreen extends Screen {
 					if (!itemSelected && isInsideMinRadius) {
 						int currentSlot = ClientPlayerUtils.getPlayerSelectedSlot(client.player);
 
-						ItemStack lastUsedStack = inventory.getItem(lastUsedSlot);
+						ItemStack lastUsedStack = getSlotStack(inventory, lastUsedSlot);
 						renderCenterItem(context, lastUsedStack);
 
 					} else {
@@ -438,9 +449,18 @@ public class RadialMenuScreen extends Screen {
 		}
 	}
 
+	private ItemStack getSlotStack(Inventory inventory, int slot) {
+		// Index 9 is the first main inventory slot, not Tenth Slot's empty hand
+		return TenthSlotCompat.isTenthSlot(slot) ? ItemStack.EMPTY : inventory.getItem(slot);
+	}
+
 	private void handleInteraction(int sourceSlot) {
 
-		ClientPlayerUtils.setPlayerSelectedSlot(client.player, sourceSlot);
+		if (TenthSlotCompat.isTenthSlot(sourceSlot)) {
+			TenthSlotCompat.select(client.player);
+		} else {
+			ClientPlayerUtils.setPlayerSelectedSlot(client.player, sourceSlot);
+		}
 
 		if (client.getConnection() != null) {
 			client.getConnection().send(new ServerboundSetCarriedItemPacket(sourceSlot));
@@ -469,6 +489,11 @@ public class RadialMenuScreen extends Screen {
 	}
 
 	private void handleInventorySwap(int sourceSlot) {
+
+		if (TenthSlotCompat.isTenthSlot(sourceSlot)) {
+			handleInteraction(sourceSlot);
+			return;
+		}
 
 		if (sourceSlot >= 0 && sourceSlot < 9) {
 

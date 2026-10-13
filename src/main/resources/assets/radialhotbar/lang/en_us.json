@@ -30,5 +30,8 @@
   "config.radialhotbar.option.previousItemInCenterOnNoSelect.tooltip": "If no slot is selected, the radial menu shows the last used item in the center.",
   "config.radialhotbar.option.enabledSlots": "Enabled Slots",
   "config.radialhotbar.option.enabledSlots.tooltip": "Choose which hot bar slots (1-9) appear in the radial menu.",
-  "config.radialhotbar.option.enabledSlots.slot": "Slot %s"
+  "config.radialhotbar.option.enabledSlots.slot": "Slot %s",
+  "config.radialhotbar.option.tenthSlotCompat": "Tenth Slot Compatibility",
+  "config.radialhotbar.option.tenthSlotCompat.tooltip": "Shows the empty hand slot from the Tenth Slot mod in the radial menu.",
+  "radialhotbar.tenthslot.label": "Hand"
 }

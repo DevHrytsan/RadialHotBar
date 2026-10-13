@@ -1,6 +1,7 @@
 package github.devhrytsan.radialhotbar.config;
 
 import github.devhrytsan.radialhotbar.Constants;
+import github.devhrytsan.radialhotbar.compatibility.TenthSlotCompat;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -128,6 +129,14 @@ public class RadialHotBarConfigScreen {
 		}
 
 		general.addEntry(enabledSlotsCategory.build());
+
+		if (TenthSlotCompat.isLoaded()) {
+			general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.radialhotbar.option.tenthSlotCompat"), FileConfigHandler.CONFIG_INSTANCE.useTenthSlotCompat)
+					.setDefaultValue(true)
+					.setTooltip(Component.translatable("config.radialhotbar.option.tenthSlotCompat.tooltip"))
+					.setSaveConsumer(newValue -> FileConfigHandler.CONFIG_INSTANCE.useTenthSlotCompat = newValue)
+					.build());
+		}
 
         return builder.build();
     }
