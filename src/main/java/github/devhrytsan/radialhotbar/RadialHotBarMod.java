@@ -30,7 +30,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.fml.ModLoadingContext;
+import github.devhrytsan.radialhotbar.platform.neoforge.NeoforgeEntrypoint;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 		*///?} forge {
 /*import github.devhrytsan.radialhotbar.platform.forge.ForgePlatform;
@@ -39,7 +39,7 @@ import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.ModLoadingContext;
+import github.devhrytsan.radialhotbar.platform.forge.ForgeEntrypoint;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 *///?}
 
@@ -54,7 +54,10 @@ public class RadialHotBarMod {
 	// Keys
 	public static KeyMapping OPEN_RADIAL_MENU_KEY;
 
-	//? if >=1.21.5 {
+	//? if >=1.21.5 && neoforge {
+	/*// NeoForge registers modded categories through RegisterKeyMappingsEvent instead
+	public static final KeyMapping.Category KEYBIND_CATEGORY = new KeyMapping.Category(ResourceLocation.fromNamespaceAndPath(RadialHotBarMod.MOD_ID, "general"));
+	*///? } elif >=1.21.5 {
 	public static final KeyMapping.Category KEYBIND_CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(RadialHotBarMod.MOD_ID, "general"));
 	//? } else {
 
@@ -105,6 +108,9 @@ public class RadialHotBarMod {
 				KEYBIND_CATEGORY
 		);
 
+		//? if >=1.21.5 {
+		event.registerCategory(KEYBIND_CATEGORY);
+		//? }
 		event.register(OPEN_RADIAL_MENU_KEY);
 	}
 
@@ -127,9 +133,9 @@ public class RadialHotBarMod {
 			}
 		});
 
-		ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class, () -> (client, parent) -> {
+		NeoforgeEntrypoint.CONTAINER.registerExtensionPoint(IConfigScreenFactory.class, (IConfigScreenFactory) (client, parent) -> {
 			return RadialHotBarConfigScreen.createConfigScreen(parent);
-		}); //TODO: Rewrite that because of deprecated API.
+		});
 	}
 
 	*///?} forge {
@@ -162,12 +168,12 @@ public class RadialHotBarMod {
 			}
 		});
 
-		ModLoadingContext.get().registerExtensionPoint(
+		ForgeEntrypoint.CONTEXT.registerExtensionPoint(
 				ConfigScreenHandler.ConfigScreenFactory.class,
 				() -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> {
 					return RadialHotBarConfigScreen.createConfigScreen(parent);
 				})
-		); //TODO: Rewrite that because of deprecated API.
+		);
 	}
 
 	*///?}
